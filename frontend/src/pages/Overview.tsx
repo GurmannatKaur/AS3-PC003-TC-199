@@ -1,4 +1,10 @@
+
 import "../styles/dashboard.css";
+import ChandigarhMap from "../components/ChandigarhMap";
+
+type OverviewProps = {
+  onNavigate: (page: string) => void;
+};
 
 const metrics = [
   {
@@ -9,7 +15,7 @@ const metrics = [
   },
   {
     title: "Participating Clients",
-    value: "04",
+    value: "03",
     subtitle: "Connected traffic nodes",
     icon: "⌘",
   },
@@ -54,13 +60,12 @@ const workflow = [
   },
 ];
 
-export default function Overview() {
+export default function Overview({ onNavigate }: OverviewProps) {
   return (
     <div className="dashboard">
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-icon">✦</div>
-
           <div>
             <h2>MOSAIC</h2>
             <p>Federated Intelligence</p>
@@ -148,7 +153,6 @@ export default function Overview() {
                 <h2>Federated Learning Workflow</h2>
                 <p>Overview of the model training pipeline</p>
               </div>
-
               <span className="panel-badge">FedAvg</span>
             </div>
 
@@ -180,7 +184,6 @@ export default function Overview() {
                 <h2>Model Performance</h2>
                 <p>Global model evaluation</p>
               </div>
-
               <span className="metric-icon">⌁</span>
             </div>
 
@@ -215,25 +218,11 @@ export default function Overview() {
                 <h2>Traffic Flow Prediction</h2>
                 <p>Expected traffic for the next 15 minutes</p>
               </div>
-
-              <span className="panel-badge">Live View</span>
+              <span className="panel-badge">Demo View</span>
             </div>
 
             <div className="traffic-chart">
-              <div className="chart-grid-lines">
-                <span>High</span>
-                <span>Medium</span>
-                <span>Low</span>
-              </div>
-
-              <div className="chart-empty">
-                <div className="chart-empty-icon">↗</div>
-                <h3>Prediction data will appear here</h3>
-                <p>
-                  Connect the trained global model to display traffic
-                  forecasts.
-                </p>
-              </div>
+              <ChandigarhMap />
             </div>
           </div>
 
@@ -245,7 +234,12 @@ export default function Overview() {
               </div>
             </div>
 
-            <button className="action-button">
+            <button
+              className="action-button"
+              onClick={() =>
+                alert("Training functionality will be implemented next.")
+              }
+            >
               <span className="action-icon">▶</span>
               <span>
                 <strong>Start Training</strong>
@@ -254,7 +248,10 @@ export default function Overview() {
               <span className="action-arrow">›</span>
             </button>
 
-            <button className="action-button">
+            <button
+              className="action-button"
+              onClick={() => onNavigate("clients")}
+            >
               <span className="action-icon">⌘</span>
               <span>
                 <strong>View Clients</strong>
@@ -263,7 +260,12 @@ export default function Overview() {
               <span className="action-arrow">›</span>
             </button>
 
-            <button className="action-button">
+            <button
+              className="action-button"
+              onClick={() =>
+                alert("Reports functionality will be implemented next.")
+              }
+            >
               <span className="action-icon">▤</span>
               <span>
                 <strong>View Reports</strong>
