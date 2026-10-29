@@ -1,0 +1,1 @@
+# MOSAIC API schemas package

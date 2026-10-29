@@ -1,10 +1,5 @@
-
 import "../styles/dashboard.css";
 import ChandigarhMap from "../components/ChandigarhMap";
-
-type OverviewProps = {
-  onNavigate: (page: string) => void;
-};
 
 const metrics = [
   {
@@ -60,71 +55,26 @@ const workflow = [
   },
 ];
 
-export default function Overview({ onNavigate }: OverviewProps) {
+export default function Overview() {
   return (
     <div className="dashboard">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-icon">✦</div>
-          <div>
-            <h2>MOSAIC</h2>
-            <p>Federated Intelligence</p>
-          </div>
-        </div>
-
-        <nav className="sidebar-nav">
-          <p className="nav-label">WORKSPACE</p>
-
-          <a className="nav-item active" href="#">
-            <span>▦</span>
-            Overview
-          </a>
-
-          <a className="nav-item" href="#">
-            <span>⌁</span>
-            Traffic Network
-          </a>
-
-          <a className="nav-item" href="#">
-            <span>◈</span>
-            Federated Training
-          </a>
-
-          <a className="nav-item" href="#">
-            <span>⌁</span>
-            Predictions
-          </a>
-
-          <p className="nav-label second-label">SYSTEM</p>
-
-          <a className="nav-item" href="#">
-            <span>⚙</span>
-            Settings
-          </a>
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="status-dot" />
-          <span>System Ready</span>
-        </div>
-      </aside>
-
       <main className="main-content">
         <header className="topbar">
           <div>
-            <p className="breadcrumb">Workspace / Overview</p>
-            <h1>Dashboard Overview</h1>
-            <p className="page-subtitle">
-              Monitor your federated traffic prediction network.
-            </p>
+            <h1>Overview</h1>
+            <p>Federated traffic intelligence dashboard</p>
           </div>
 
           <div className="topbar-actions">
-            <button className="icon-button" aria-label="Notifications">
+            <button
+              className="icon-button"
+              aria-label="Notifications"
+              type="button"
+            >
               ♧
             </button>
 
-            <button className="profile-button">
+            <button className="profile-button" type="button">
               <span className="profile-avatar">SK</span>
               <span className="profile-name">Admin</span>
               <span>⌄</span>
@@ -153,6 +103,7 @@ export default function Overview({ onNavigate }: OverviewProps) {
                 <h2>Federated Learning Workflow</h2>
                 <p>Overview of the model training pipeline</p>
               </div>
+
               <span className="panel-badge">FedAvg</span>
             </div>
 
@@ -184,6 +135,7 @@ export default function Overview({ onNavigate }: OverviewProps) {
                 <h2>Model Performance</h2>
                 <p>Global model evaluation</p>
               </div>
+
               <span className="metric-icon">⌁</span>
             </div>
 
@@ -218,7 +170,8 @@ export default function Overview({ onNavigate }: OverviewProps) {
                 <h2>Traffic Flow Prediction</h2>
                 <p>Expected traffic for the next 15 minutes</p>
               </div>
-              <span className="panel-badge">Demo View</span>
+
+              <span className="panel-badge">Map View</span>
             </div>
 
             <div className="traffic-chart">
@@ -234,45 +187,38 @@ export default function Overview({ onNavigate }: OverviewProps) {
               </div>
             </div>
 
-            <button
-              className="action-button"
-              onClick={() =>
-                alert("Training functionality will be implemented next.")
-              }
-            >
+            <a className="action-button" href="/federated-learning">
               <span className="action-icon">▶</span>
+
               <span>
                 <strong>Start Training</strong>
                 <small>Begin a federated round</small>
               </span>
-              <span className="action-arrow">›</span>
-            </button>
 
-            <button
-              className="action-button"
-              onClick={() => onNavigate("clients")}
-            >
+              <span className="action-arrow">›</span>
+            </a>
+
+            <a className="action-button" href="/traffic-map">
               <span className="action-icon">⌘</span>
+
               <span>
                 <strong>View Clients</strong>
                 <small>Manage connected clients</small>
               </span>
-              <span className="action-arrow">›</span>
-            </button>
 
-            <button
-              className="action-button"
-              onClick={() =>
-                alert("Reports functionality will be implemented next.")
-              }
-            >
+              <span className="action-arrow">›</span>
+            </a>
+
+            <a className="action-button" href="/traffic-prediction">
               <span className="action-icon">▤</span>
+
               <span>
                 <strong>View Reports</strong>
                 <small>Check model evaluation</small>
               </span>
+
               <span className="action-arrow">›</span>
-            </button>
+            </a>
           </div>
         </section>
 

@@ -1,3 +1,4 @@
+
 import "../styles/dashboard.css";
 
 const predictions = [
@@ -51,7 +52,18 @@ const locations = [
 ];
 
 export default function TrafficPrediction() {
-  const maxVehicles = Math.max(...predictions.map((item) => item.vehicles));
+  const currentTraffic = predictions[0].vehicles;
+  const predictedTraffic = predictions[predictions.length - 1].vehicles;
+
+  const maxVehicles = Math.max(
+    ...predictions.map((item) => item.vehicles)
+  );
+
+  const trafficReduction = Math.round(
+    ((currentTraffic - predictedTraffic) / currentTraffic) * 100
+  );
+
+  const predictedLevel = predictions[predictions.length - 1].level;
 
   return (
     <div className="dashboard">
@@ -72,17 +84,17 @@ export default function TrafficPrediction() {
             Overview
           </a>
 
-          <a className="nav-item" href="#">
+          <a className="nav-item" href="/traffic-map">
             <span>⌁</span>
             Traffic Network
           </a>
 
-          <a className="nav-item" href="#">
+          <a className="nav-item" href="/federated-learning">
             <span>◈</span>
             Federated Training
           </a>
 
-          <a className="nav-item active" href="#">
+          <a className="nav-item active" href="/traffic-prediction">
             <span>⌁</span>
             Predictions
           </a>
@@ -134,8 +146,12 @@ export default function TrafficPrediction() {
               <p>Current Traffic</p>
               <span className="metric-icon">↗</span>
             </div>
-            <h2>1,240</h2>
-            <p className="metric-subtitle">Vehicles detected</p>
+
+            <h2>{currentTraffic.toLocaleString()}</h2>
+
+            <p className="metric-subtitle">
+              Vehicles detected
+            </p>
           </div>
 
           <div className="metric-card">
@@ -143,8 +159,12 @@ export default function TrafficPrediction() {
               <p>Predicted Traffic</p>
               <span className="metric-icon">⌁</span>
             </div>
-            <h2>760</h2>
-            <p className="metric-subtitle">Next 15 minutes</p>
+
+            <h2>{predictedTraffic.toLocaleString()}</h2>
+
+            <p className="metric-subtitle">
+              Next 15 minutes · {trafficReduction}% decrease
+            </p>
           </div>
 
           <div className="metric-card">
@@ -152,8 +172,12 @@ export default function TrafficPrediction() {
               <p>Traffic Intensity</p>
               <span className="metric-icon">◉</span>
             </div>
-            <h2>Moderate</h2>
-            <p className="metric-subtitle">Expected traffic level</p>
+
+            <h2>{predictedLevel}</h2>
+
+            <p className="metric-subtitle">
+              Expected traffic level
+            </p>
           </div>
 
           <div className="metric-card">
@@ -161,8 +185,12 @@ export default function TrafficPrediction() {
               <p>Forecast Horizon</p>
               <span className="metric-icon">◷</span>
             </div>
+
             <h2>15 Min</h2>
-            <p className="metric-subtitle">Prediction window</p>
+
+            <p className="metric-subtitle">
+              Prediction window
+            </p>
           </div>
         </section>
 
@@ -170,7 +198,9 @@ export default function TrafficPrediction() {
           <div className="panel-heading">
             <div>
               <h2>Traffic Flow Forecast</h2>
-              <p>Expected vehicle count over the next 15 minutes</p>
+              <p>
+                Expected vehicle count over the next 15 minutes
+              </p>
             </div>
 
             <span className="panel-badge">Forecast</span>
@@ -186,7 +216,10 @@ export default function TrafficPrediction() {
 
             <div className="prediction-bars">
               {predictions.map((item) => (
-                <div className="prediction-bar-column" key={item.time}>
+                <div
+                  className="prediction-bar-column"
+                  key={item.time}
+                >
                   <span className="prediction-bar-value">
                     {item.vehicles.toLocaleString()}
                   </span>
@@ -219,7 +252,9 @@ export default function TrafficPrediction() {
           <div className="panel-heading">
             <div>
               <h2>Location-Based Predictions</h2>
-              <p>Forecast details for monitored traffic locations</p>
+              <p>
+                Forecast details for monitored traffic locations
+              </p>
             </div>
           </div>
 
@@ -263,7 +298,7 @@ export default function TrafficPrediction() {
 
         <footer className="dashboard-footer">
           <span>MOSAIC · Federated Traffic Intelligence</span>
-          <span>Backend integration pending</span>
+          <span>Demo Data · Backend Integration Pending</span>
         </footer>
       </main>
     </div>

@@ -21,7 +21,34 @@ const clients = [
   },
 ];
 
+const workflowSteps = [
+  {
+    number: "01",
+    title: "Local Training",
+    description: "Each location trains its model using its own traffic data.",
+  },
+  {
+    number: "02",
+    title: "Model Updates",
+    description: "Only model parameters are shared with the central server.",
+  },
+  {
+    number: "03",
+    title: "Aggregation",
+    description: "The server combines updates to improve the global model.",
+  },
+  {
+    number: "04",
+    title: "Global Distribution",
+    description: "The improved model is sent back to participating clients.",
+  },
+];
+
 export default function FederatedLearning() {
+  const activeClients = clients.filter(
+    (client) => client.status === "Active"
+  ).length;
+
   return (
     <div className="dashboard-page">
       <div className="page-header">
@@ -42,7 +69,7 @@ export default function FederatedLearning() {
       <div className="stats-grid">
         <div className="stat-card">
           <span className="stat-label">Connected Clients</span>
-          <h2>3</h2>
+          <h2>{activeClients}</h2>
           <p>Traffic data sources</p>
         </div>
 
@@ -71,40 +98,18 @@ export default function FederatedLearning() {
             <h2>Federated Learning Workflow</h2>
             <p>How local models contribute to the global model</p>
           </div>
+
+          <span className="panel-badge">FedAvg</span>
         </div>
 
         <div className="workflow-grid">
-          <div className="workflow-step">
-            <div className="workflow-number">01</div>
-            <h3>Local Training</h3>
-            <p>
-              Each location trains its model using its own traffic data.
-            </p>
-          </div>
-
-          <div className="workflow-step">
-            <div className="workflow-number">02</div>
-            <h3>Model Updates</h3>
-            <p>
-              Only model parameters are shared with the central server.
-            </p>
-          </div>
-
-          <div className="workflow-step">
-            <div className="workflow-number">03</div>
-            <h3>Aggregation</h3>
-            <p>
-              The server combines updates to improve the global model.
-            </p>
-          </div>
-
-          <div className="workflow-step">
-            <div className="workflow-number">04</div>
-            <h3>Global Distribution</h3>
-            <p>
-              The improved model is sent back to participating clients.
-            </p>
-          </div>
+          {workflowSteps.map((step) => (
+            <div className="workflow-step" key={step.number}>
+              <div className="workflow-number">{step.number}</div>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -114,6 +119,10 @@ export default function FederatedLearning() {
             <h2>Participating Clients</h2>
             <p>Local training status across traffic locations</p>
           </div>
+
+          <span className="panel-badge">
+            {clients.length} Clients
+          </span>
         </div>
 
         <div className="table-wrapper">
@@ -130,7 +139,10 @@ export default function FederatedLearning() {
             <tbody>
               {clients.map((client) => (
                 <tr key={client.name}>
-                  <td>{client.name}</td>
+                  <td>
+                    <strong>{client.name}</strong>
+                  </td>
+
                   <td>
                     <span
                       className={`status-badge ${
@@ -142,6 +154,7 @@ export default function FederatedLearning() {
                       {client.status}
                     </span>
                   </td>
+
                   <td>{client.data}</td>
                   <td>{client.accuracy}</td>
                 </tr>
@@ -161,7 +174,7 @@ export default function FederatedLearning() {
 
         <div className="info-grid">
           <div className="info-card">
-            <h3>🔒 Data Privacy</h3>
+            <h3>Data Privacy</h3>
             <p>
               Raw traffic data remains on each participating client.
               Only model updates are shared.
@@ -169,7 +182,7 @@ export default function FederatedLearning() {
           </div>
 
           <div className="info-card">
-            <h3>🌐 Collaborative Learning</h3>
+            <h3>Collaborative Learning</h3>
             <p>
               Multiple locations contribute to a shared model that can
               learn from distributed traffic patterns.
@@ -177,7 +190,7 @@ export default function FederatedLearning() {
           </div>
 
           <div className="info-card">
-            <h3>📡 Communication Efficiency</h3>
+            <h3>Communication Efficiency</h3>
             <p>
               Model updates are exchanged instead of transferring complete
               local datasets.
