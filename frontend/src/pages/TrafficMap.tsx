@@ -192,13 +192,13 @@ export default function TrafficMap() {
             <small>
               {selectedRoad.congestion} traffic ·{" "}
               {formatSpeed(selectedRoad.averageSpeed, speedUnit)} ·{" "}
-              {selectedRoad.flow.toLocaleString()} veh/h sample
+              {selectedRoad.flow.toLocaleString()} veh/h · illustrative
             </small>
           </span>
         </div>
 
         <span className="map-location-note">
-          Approximate corridor markers · sample scenario
+          Approximate corridor markers · illustrative locations
         </span>
       </section>
 
@@ -208,7 +208,7 @@ export default function TrafficMap() {
             <span className="eyebrow">NETWORK OVERVIEW</span>
             <h2>Traffic corridors</h2>
             <p>
-              Explore the sample traffic information associated with each
+              Explore the illustrative traffic information associated with each
               configured road.
             </p>
           </div>

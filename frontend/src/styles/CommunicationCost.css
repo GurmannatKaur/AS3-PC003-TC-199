@@ -1,0 +1,221 @@
+/* Communication Cost Page Styles - Integrated with MOSAIC Design System */
+
+.comm-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.comm-compare-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 160px;
+  padding: 22px;
+  border: 1px solid #deedf5;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: var(--soft-shadow);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.comm-compare-card:hover {
+  transform: translateY(-2px);
+  border-color: #9cd5ef;
+  box-shadow: var(--shadow);
+}
+
+.comm-compare-card.recommended {
+  border-color: #b3e7d6;
+  background: linear-gradient(145deg, #ffffff, #f4fdf9);
+}
+
+.comm-compare-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.comm-compare-head h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.4px;
+}
+
+.comm-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.comm-badge.high {
+  color: #c53030;
+  background: #fff0f0;
+  border: 1px solid #ffd6d6;
+}
+
+.comm-badge.efficient {
+  color: #0f766e;
+  background: #e6fffa;
+  border: 1px solid #b2f5ea;
+}
+
+.comm-compare-card p {
+  margin: 0 0 16px;
+  color: #647d92;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.comm-compare-stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid #eef5fa;
+  font-size: 12px;
+  color: #71879a;
+}
+
+.comm-compare-stat strong {
+  color: var(--navy);
+  font-size: 15px;
+  font-weight: 750;
+}
+
+/* Table Container & Table Styles */
+
+.comm-table-container {
+  overflow-x: auto;
+  border: 1px solid #deedf5;
+  border-radius: 17px;
+  background: #ffffff;
+  box-shadow: var(--soft-shadow);
+  margin-top: 4px;
+}
+
+.comm-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.comm-table th {
+  padding: 14px 18px;
+  border-bottom: 1px solid #dcedf6;
+  background: #f4faff;
+  color: #55718a;
+  font-size: 10.5px;
+  font-weight: 750;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.comm-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #eef4f8;
+  color: var(--navy);
+  font-size: 13.5px;
+  vertical-align: middle;
+}
+
+.comm-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.comm-table tbody tr {
+  transition: background 120ms ease;
+}
+
+.comm-table tbody tr:hover {
+  background: #f8fcff;
+}
+
+.comm-table td strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.comm-table td small {
+  display: block;
+  font-size: 11px;
+  color: #7a92a5;
+  margin-top: 2px;
+}
+
+.comm-transfer-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: 999px;
+  color: var(--deep-blue);
+  background: #e7f5fd;
+  border: 1px solid #c8e8f9;
+  font-weight: 750;
+  font-size: 12.5px;
+}
+
+/* Formula Card Styles */
+
+.comm-formula-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid #dcecf5;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #f7fcff, #edf7fc);
+  margin-top: 4px;
+}
+
+.comm-formula-equation {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border: 1px solid #cbe4f4;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(20, 100, 150, 0.04);
+}
+
+.comm-formula-plain {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--deep-blue);
+  letter-spacing: 0.2px;
+}
+
+.comm-formula-detail {
+  margin: 0;
+  color: #647d92;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 850px) {
+  .comm-compare-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .comm-table th,
+  .comm-table td {
+    padding: 12px 14px;
+  }
+}

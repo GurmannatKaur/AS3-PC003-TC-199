@@ -249,7 +249,7 @@ export default function ChandigarhMap({
                 <span className={`traffic-level ${road.congestion.toLowerCase()}`}>
                   {road.congestion} traffic
                 </span>
-                <small>Sample scenario · approximate marker location</small>
+                <small>Illustrative values · approximate marker location</small>
               </div>
             </Popup>
           </CircleMarker>
@@ -263,7 +263,6 @@ export default function ChandigarhMap({
             {level}
           </span>
         ))}
-        <span className="legend-sample">Sample scenario</span>
       </div>
     </div>
   );

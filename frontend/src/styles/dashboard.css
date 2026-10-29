@@ -102,6 +102,8 @@ a:focus-visible {
   background: transparent;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
+  border-bottom: 0;
 }
 
 .wordmark strong {
@@ -130,7 +132,6 @@ a:focus-visible {
 .nav-link {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
   min-height: 39px;
   padding: 0 12px;
   border: 0;
@@ -142,6 +143,17 @@ a:focus-visible {
   white-space: nowrap;
   cursor: pointer;
   transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+  text-decoration: none;
+  border-bottom: 0;
+}
+
+.wordmark:hover,
+.wordmark:focus-visible,
+.top-navigation .nav-link:hover,
+.top-navigation .nav-link:focus-visible,
+.top-navigation .nav-link.active {
+  text-decoration: none;
+  border-bottom: 0;
 }
 
 .nav-link:hover {
@@ -154,29 +166,6 @@ a:focus-visible {
   color: #fff;
   background: var(--blue);
   box-shadow: 0 5px 13px rgba(20, 125, 179, 0.2);
-}
-
-.nav-icon {
-  color: #55b8e4;
-  font-size: 15px;
-  line-height: 1;
-}
-
-.nav-link:nth-child(2) .nav-icon,
-.nav-link:nth-child(5) .nav-icon {
-  color: #e9a828;
-}
-
-.nav-link:nth-child(3) .nav-icon {
-  color: #39bfae;
-}
-
-.nav-link:nth-child(4) .nav-icon {
-  color: #9b84e8;
-}
-
-.nav-link.active .nav-icon {
-  color: #fff;
 }
 
 .header-location {
@@ -640,19 +629,6 @@ a:focus-visible {
 
 .flow-card .section-heading h2 {
   font-size: 17px;
-}
-
-.sample-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 9px;
-  border-radius: 999px;
-  color: #466e91;
-  background: #e9f5ff;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.55px;
-  white-space: nowrap;
 }
 
 .trend-chart {
@@ -1936,7 +1912,6 @@ button.summary-card:hover {
   }
 
   .nav-link {
-    gap: 5px;
     padding: 0 8px;
     font-size: 9px;
   }
@@ -2482,15 +2457,9 @@ html[data-reduce-motion="true"] *::after {
 
 .nav-link {
   min-height: 46px;
-  gap: 8px;
   padding: 0 12px;
   font-size: 16px;
   font-weight: 650;
-}
-
-.nav-icon {
-  width: 19px;
-  font-size: 18px;
 }
 
 .header-location {
@@ -2568,7 +2537,6 @@ html[data-reduce-motion="true"] *::after {
 .network-road-chip small,
 .network-bottom-float small,
 .map-location-note,
-.legend-sample,
 .junction-popup small {
   font-size: 14px;
 }
@@ -2606,7 +2574,6 @@ html[data-reduce-motion="true"] *::after {
 
 .traffic-level,
 .status-pill,
-.sample-pill,
 .count-pill {
   padding: 7px 11px;
   font-size: 14px;
@@ -3111,8 +3078,7 @@ html[data-reduce-motion="true"] *::after {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #e9e9f2;
+  padding-bottom: 6px;
 }
 
 .route-result-icon {
@@ -3497,8 +3463,7 @@ html[data-reduce-motion="true"] *::after {
   .client-details small,
   .road-row-info small,
   .traffic-level,
-  .status-pill,
-  .sample-pill {
+  .status-pill {
     font-size: 13px;
   }
 
@@ -3544,10 +3509,6 @@ html[data-reduce-motion="true"] *::after {
 
   .map-legend {
     font-size: 12px;
-  }
-
-  .legend-sample {
-    font-size: 11px;
   }
 
   .junction-popup strong {
@@ -3744,4 +3705,16 @@ html[data-reduce-motion="true"] *::after {
 
 .main-content .eyebrow {
   letter-spacing: 0.08em;
+}
+
+
+/* HEADINGS RESET - ENSURE NO UNWANTED UNDERLINES */
+h1, h2, h3, h4, h5, h6,
+.page-intro h1,
+.section-heading h2,
+.emergency-section-heading h2,
+.route-result-heading h3,
+.overview-page-intro h1 {
+  text-decoration: none;
+  border-bottom: none;
 }

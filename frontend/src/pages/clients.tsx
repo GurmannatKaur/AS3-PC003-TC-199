@@ -60,7 +60,7 @@ export default function Clients({
                     <span className={`traffic-level ${road.congestion.toLowerCase()}`}>{road.congestion}</span>
                   </div>
                   <div className="client-card-field">
-                    <small>Sample traffic scenario</small>
+                    <small>Illustrative traffic scenario</small>
                     <strong>{road.flow.toLocaleString()} veh/h · {formatSpeed(road.averageSpeed, speedUnit)}</strong>
                   </div>
                   <div className="client-card-field">

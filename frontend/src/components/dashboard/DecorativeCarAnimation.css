@@ -1,0 +1,186 @@
+/* Decorative Smart City Traffic Animation - MOSAIC Overview */
+
+.overview-car-showcase {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: 140px;
+  margin: 6px 0 20px;
+  padding: 0;
+  border-radius: 22px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(238, 248, 255, 0.5) 100%
+  );
+  border: 1px solid rgba(214, 235, 248, 0.8);
+  box-shadow: 0 4px 20px rgba(20, 100, 150, 0.045);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scenic-car-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   Traffic Signal Lamp Animation Cycles (12.0s Total Cycle)
+   0%  - 38% (0.0s - 4.56s): RED light active (Vehicle 1 decelerates and stops)
+   38% - 83% (4.56s - 10.0s): GREEN light active (Vehicles proceed & stream)
+   83% - 100% (10.0s - 12.0s): AMBER light active (Caution / Transition phase)
+   ========================================================================== */
+
+.signal-lamp-red {
+  animation: trafficCycleRed 12s ease-in-out infinite;
+}
+
+.signal-lamp-green {
+  animation: trafficCycleGreen 12s ease-in-out infinite;
+}
+
+.signal-lamp-amber {
+  animation: trafficCycleAmber 12s ease-in-out infinite;
+}
+
+@keyframes trafficCycleRed {
+  0%, 34% {
+    fill: #ef4444;
+    opacity: 1;
+    filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.85));
+  }
+  38%, 97% {
+    fill: #3b1717;
+    opacity: 0.28;
+    filter: none;
+  }
+  100% {
+    fill: #ef4444;
+    opacity: 1;
+    filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.85));
+  }
+}
+
+@keyframes trafficCycleGreen {
+  0%, 35% {
+    fill: #112d22;
+    opacity: 0.28;
+    filter: none;
+  }
+  38%, 80% {
+    fill: #10b981;
+    opacity: 1;
+    filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.85));
+  }
+  83%, 100% {
+    fill: #112d22;
+    opacity: 0.28;
+    filter: none;
+  }
+}
+
+@keyframes trafficCycleAmber {
+  0%, 80% {
+    fill: #38250f;
+    opacity: 0.28;
+    filter: none;
+  }
+  83%, 97% {
+    fill: #f59e0b;
+    opacity: 1;
+    filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.85));
+  }
+  98%, 100% {
+    fill: #38250f;
+    opacity: 0.28;
+    filter: none;
+  }
+}
+
+/* ==========================================================================
+   Reduced Motion Accessibility
+   When reduced motion is requested, pause signal animation on green and park car.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .signal-lamp-red {
+    animation: none !important;
+    fill: #3b1717 !important;
+    opacity: 0.28 !important;
+    filter: none !important;
+  }
+  .signal-lamp-amber {
+    animation: none !important;
+    fill: #38250f !important;
+    opacity: 0.28 !important;
+    filter: none !important;
+  }
+  .signal-lamp-green {
+    animation: none !important;
+    fill: #10b981 !important;
+    opacity: 1 !important;
+    filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.6)) !important;
+  }
+  .scenic-car-vehicle.car-primary {
+    transform: translate(430px, 72px) rotate(-16deg) !important;
+  }
+  .scenic-car-vehicle.car-secondary {
+    display: none !important;
+  }
+}
+
+[data-reduce-motion="true"] .signal-lamp-red {
+  animation: none !important;
+  fill: #3b1717 !important;
+  opacity: 0.28 !important;
+  filter: none !important;
+}
+
+[data-reduce-motion="true"] .signal-lamp-amber {
+  animation: none !important;
+  fill: #38250f !important;
+  opacity: 0.28 !important;
+  filter: none !important;
+}
+
+[data-reduce-motion="true"] .signal-lamp-green {
+  animation: none !important;
+  fill: #10b981 !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.6)) !important;
+}
+
+[data-reduce-motion="true"] .scenic-car-vehicle.car-primary {
+  transform: translate(430px, 72px) rotate(-16deg) !important;
+}
+
+[data-reduce-motion="true"] .scenic-car-vehicle.car-secondary {
+  display: none !important;
+}
+
+/* ==========================================================================
+   Responsive Scaling
+   ========================================================================== */
+
+@media (max-width: 850px) {
+  .overview-car-showcase {
+    height: 110px;
+    margin: 4px 0 16px;
+    border-radius: 18px;
+  }
+}
+
+@media (max-width: 580px) {
+  .overview-car-showcase {
+    height: 90px;
+    margin: 2px 0 12px;
+    border-radius: 14px;
+  }
+}

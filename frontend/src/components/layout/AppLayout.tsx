@@ -8,14 +8,13 @@ interface AppLayoutProps {
 }
 
 const navigation = [
-  { to: "/", label: "Overview", icon: "overview", end: true },
-  { to: "/traffic-map", label: "Traffic Network", icon: "network" },
-  { to: "/clients", label: "Federated Clients", icon: "clients" },
-  { to: "/federated-learning", label: "Federated Training", icon: "training" },
-  { to: "/traffic-prediction", label: "Predictions", icon: "predictions" },
-  { to: "/communication-cost", label: "Communication Cost", icon: "network" },
-  { to: "/emergency-route-support", label: "Emergency Routes", icon: "network" },
-  { to: "/settings", label: "Settings", icon: "settings" },
+  { to: "/", label: "Overview", end: true },
+  { to: "/traffic-map", label: "Traffic Network" },
+  { to: "/clients", label: "Federated Clients" },
+  { to: "/federated-learning", label: "Federated Training" },
+  { to: "/traffic-prediction", label: "Predictions" },
+  { to: "/communication-cost", label: "Communication Cost" },
+  { to: "/settings", label: "Settings" },
 ] as const;
 
 export default function AppLayout({ children }: AppLayoutProps) {
@@ -37,7 +36,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 `nav-link ${isActive ? "active" : ""}`
               }
             >
-              <Icon name={item.icon} className="nav-icon" />
               <span>{item.label}</span>
             </NavLink>
           ))}
@@ -53,7 +51,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         {children}
         <footer className="dashboard-footer">
           <span>MOSAIC · Federated Traffic Intelligence</span>
-          <span>Sample scenarios are identified in the data views</span>
+          <span>Traffic values are illustrative; models and clients are offline</span>
         </footer>
       </main>
     </div>

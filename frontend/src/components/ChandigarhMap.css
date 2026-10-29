@@ -197,13 +197,6 @@
   background: #4bc797;
 }
 
-.legend-sample {
-  padding-left: 9px;
-  border-left: 1px solid #dfeaf1;
-  color: #7b8f9e;
-  font-size: 13px;
-}
-
 .junction-popup {
   display: grid;
   gap: 6px;
@@ -292,8 +285,4 @@
     font-size: 13px;
   }
 
-  .legend-sample {
-    padding-left: 6px;
-    font-size: 13px;
-  }
 }

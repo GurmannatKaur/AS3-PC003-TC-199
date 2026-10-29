@@ -5,6 +5,7 @@ import ChandigarhMap from "../components/ChandigarhMap";
 import { roads } from "../data/trafficSamples";
 import { formatSpeed, usePreferences } from "../data/preferences";
 import Icon from "../components/common/Icon";
+import DecorativeCarAnimation from "../components/dashboard/DecorativeCarAnimation";
 
 const trend = [38, 48, 44, 61, 58, 72, 64, 82, 77, 91, 83, 96];
 
@@ -40,7 +41,16 @@ export default function Overview() {
   const selectedRoad = roads[0];
 
   return (
-    <div className="page-stack">
+    <div className="page-stack page-overview">
+      <header className="page-intro">
+        <div className="page-intro-copy">
+          <span className="eyebrow">FEDERATED TRAFFIC INTELLIGENCE</span>
+          <h1>Dashboard Overview</h1>
+        </div>
+      </header>
+
+      <DecorativeCarAnimation />
+
       <section className="overview-hero map-reveal">
         <ChandigarhMap className="overview-map" />
 
@@ -68,7 +78,7 @@ export default function Overview() {
           <span className="map-caption-pulse" />
           <div>
             <strong>Chandigarh road network</strong>
-            <small>Sample scenario · approximate corridor markers</small>
+            <small>Illustrative corridor markers · not live sensor data</small>
           </div>
         </div>
       </section>
@@ -89,7 +99,7 @@ export default function Overview() {
             <span className="summary-icon"><Icon name="clients" /></span>
           </div>
           <strong>{roads.length.toString().padStart(2, "0")}</strong>
-          <small>Sample road locations</small>
+          <small>Configured road locations</small>
         </article>
 
         <article className="summary-card">
@@ -97,7 +107,7 @@ export default function Overview() {
             <span>Traffic outlook</span>
             <span className="summary-icon"><Icon name="predictions" /></span>
           </div>
-          <strong>Sample</strong>
+          <strong>Illustrative</strong>
           <small>Not a live prediction</small>
         </article>
 
@@ -116,7 +126,7 @@ export default function Overview() {
           <div>
             <span className="eyebrow">THREE ROADS, ONE CITY</span>
             <h2>Get to know your corridors</h2>
-            <p>Explore the sample traffic picture for each route.</p>
+            <p>Explore illustrative traffic conditions for each route.</p>
           </div>
           <Link className="button-link" to="/traffic-map">
             Explore the network <Icon name="arrow" />
@@ -151,9 +161,8 @@ export default function Overview() {
             <div>
               <span className="eyebrow">TRAFFIC RHYTHM</span>
               <h2>A day on the move</h2>
-              <p>Sample traffic-flow pattern · not sensor history</p>
+              <p>Illustrative traffic-flow pattern · not sensor history</p>
             </div>
-            <span className="sample-pill">SAMPLE</span>
           </div>
 
           <div
@@ -216,7 +225,7 @@ export default function Overview() {
           <span className="selected-flow-icon" aria-hidden="true">
             <Icon name="predictions" />
           </span>
-          <span className="eyebrow">SAMPLE ROAD</span>
+          <span className="eyebrow">SELECTED ROAD</span>
           <h2>{selectedRoad.name}</h2>
           <p>{selectedRoad.junction} · Chandigarh</p>
 
@@ -226,7 +235,7 @@ export default function Overview() {
               <strong>{formatSpeed(selectedRoad.averageSpeed, speedUnit)}</strong>
             </span>
             <span>
-              <small>Sample flow</small>
+              <small>Illustrative flow</small>
               <strong>{selectedRoad.flow.toLocaleString()} veh/h</strong>
             </span>
           </div>
@@ -262,32 +271,7 @@ export default function Overview() {
         </div>
       </section>
 
-      <section className="surface">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">QUICK ACTIONS</span>
-            <h2>Explore MOSAIC</h2>
-            <p>Navigate to the main dashboard features.</p>
-          </div>
-        </div>
 
-        <div className="info-grid">
-          <Link className="info-card" to="/traffic-map">
-            <h3>Traffic Network <Icon name="arrow" /></h3>
-            <p>Explore the mapped sample road corridors.</p>
-          </Link>
-
-          <Link className="info-card" to="/clients">
-            <h3>Federated Clients <Icon name="arrow" /></h3>
-            <p>Review the configured traffic clients.</p>
-          </Link>
-
-          <Link className="info-card" to="/communication-cost">
-            <h3>Communication Cost <Icon name="arrow" /></h3>
-            <p>Review the illustrative model-update transfer estimates.</p>
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }

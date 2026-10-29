@@ -10,7 +10,7 @@ export default function StatCard({
   title,
   value,
   description,
-  icon = "◈",
+  icon = "",
   trend,
 }: StatCardProps) {
   return (

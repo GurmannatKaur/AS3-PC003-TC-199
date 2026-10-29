@@ -19,7 +19,7 @@ export default function Topbar({
 
       <div className="topbar-right">
         <div className="topbar-date">
-          <span className="topbar-date-icon">◷</span>
+          
           <span>Traffic Intelligence</span>
         </div>
 

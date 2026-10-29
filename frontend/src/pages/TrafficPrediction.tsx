@@ -25,9 +25,9 @@ export default function TrafficPrediction() {
       <section className="prediction-controls surface">
         <div>
           <span className="eyebrow">FORECAST EXPLORER</span>
-          <h2>Example outlook by corridor</h2>
+          <h2>Corridor outlook</h2>
           <p>
-            Choose a road and time horizon to explore a sample forecast
+            Choose a road and time horizon to explore an illustrative forecast
             scenario.
           </p>
         </div>
@@ -69,15 +69,15 @@ export default function TrafficPrediction() {
           <Icon name="sparkle" />
         </span>
         <p>
-          <strong>Sample scenario</strong> · {sampleDataNote} These values are
-          not model-generated predictions.
+          <strong>Illustrative scenario</strong> · {sampleDataNote} These
+          values are not model-generated predictions.
         </p>
       </div>
 
       <section className="summary-grid prediction-summary-grid">
         <article className="summary-card">
           <div className="summary-card-heading">
-            <span>Current sample flow</span>
+            <span>Current illustrative flow</span>
             <span className="summary-icon">
               <Icon name="predictions" />
             </span>
@@ -98,7 +98,7 @@ export default function TrafficPrediction() {
           <strong>
             {finalPoint.value.toLocaleString()} <em>veh/h</em>
           </strong>
-          <small>At +{horizon} minutes · example</small>
+          <small>At +{horizon} minutes · illustrative</small>
         </article>
 
         <article className="summary-card">
@@ -114,7 +114,7 @@ export default function TrafficPrediction() {
             />
             {finalPoint.level}
           </strong>
-          <small>Sample classification</small>
+          <small>Illustrative classification</small>
         </article>
       </section>
 
@@ -124,16 +124,15 @@ export default function TrafficPrediction() {
             <span className="eyebrow">TRAFFIC FLOW</span>
             <h2>{selectedRoad.name} forecast</h2>
             <p>
-              Example vehicle flow over the next {horizon} minutes
+              Illustrative vehicle flow over the next {horizon} minutes
             </p>
           </div>
-          <span className="sample-pill">SAMPLE SCENARIO</span>
         </div>
 
         <div
           className="forecast-chart"
           role="img"
-          aria-label={`Sample flow scenario for ${selectedRoad.name}`}
+          aria-label={`Illustrative flow scenario for ${selectedRoad.name}`}
         >
           <div className="forecast-scale">
             <span>{maxFlow.toLocaleString()}</span>
@@ -177,7 +176,7 @@ export default function TrafficPrediction() {
             <span className="eyebrow">ROAD COMPARISON</span>
             <h2>Corridor outlook</h2>
             <p>
-              Sample flow and congestion across all three roads at the
+              Illustrative flow and congestion across all three roads at the
               selected horizon.
             </p>
           </div>

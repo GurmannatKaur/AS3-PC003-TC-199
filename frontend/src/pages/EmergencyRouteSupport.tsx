@@ -54,7 +54,7 @@ export default function EmergencyRouteSupport() {
         </div>
 
         <span className="status-badge status-active">
-          ● Route Support Ready
+          Route Support Ready
         </span>
       </div>
 
@@ -72,7 +72,7 @@ export default function EmergencyRouteSupport() {
 
           <h2>{recommendedRoutes}</h2>
 
-          <p>Based on sample traffic data</p>
+          <p>Based on illustrative traffic data</p>
         </div>
 
         <div className="stat-card">
@@ -98,7 +98,7 @@ export default function EmergencyRouteSupport() {
             <h2>Emergency Route Recommendations</h2>
 
             <p>
-              Sample routes for the Chandigarh–Mohali region
+              Illustrative routes for the Chandigarh–Mohali region
             </p>
           </div>
         </div>
@@ -209,7 +209,7 @@ export default function EmergencyRouteSupport() {
           <h3>Emergency Support Notice</h3>
 
           <p>
-            Route examples use sample values and are not intended for live
+            Route values are illustrative and are not intended for live
             emergency navigation.
           </p>
         </div>

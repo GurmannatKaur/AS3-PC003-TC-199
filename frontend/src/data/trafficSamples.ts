@@ -49,7 +49,7 @@ export const roads: TrafficRoad[] = [
 ];
 
 export const sampleDataNote =
-  "Sample traffic values · approximate road marker locations.";
+  "Illustrative traffic values · approximate road marker locations.";
 
 export const forecasts: Record<
   string,
