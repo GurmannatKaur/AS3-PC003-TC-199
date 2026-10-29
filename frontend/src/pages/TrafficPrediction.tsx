@@ -1,306 +1,228 @@
 
+import { useState } from "react";
 import "../styles/dashboard.css";
+import { forecasts, roads, sampleDataNote } from "../data/trafficSamples";
+import { usePreferences } from "../data/preferences";
+import Icon from "../components/common/Icon";
 
-const predictions = [
-  {
-    time: "Now",
-    vehicles: 1240,
-    level: "High",
-  },
-  {
-    time: "+5 min",
-    vehicles: 1080,
-    level: "Moderate",
-  },
-  {
-    time: "+10 min",
-    vehicles: 920,
-    level: "Moderate",
-  },
-  {
-    time: "+15 min",
-    vehicles: 760,
-    level: "Low",
-  },
-];
-
-const locations = [
-  {
-    name: "Chandigarh Sector 17",
-    vehicles: "1,240",
-    level: "High",
-    confidence: "92%",
-  },
-  {
-    name: "Zirakpur Airport Road",
-    vehicles: "860",
-    level: "Moderate",
-    confidence: "88%",
-  },
-  {
-    name: "Mohali Phase 7",
-    vehicles: "420",
-    level: "Low",
-    confidence: "90%",
-  },
-  {
-    name: "Panchkula Sector 5",
-    vehicles: "730",
-    level: "Moderate",
-    confidence: "85%",
-  },
-];
+const horizons = [15, 30, 60] as const;
 
 export default function TrafficPrediction() {
-  const currentTraffic = predictions[0].vehicles;
-  const predictedTraffic = predictions[predictions.length - 1].vehicles;
+  const { defaultHorizon: horizon, setDefaultHorizon: setHorizon } =
+    usePreferences();
 
-  const maxVehicles = Math.max(
-    ...predictions.map((item) => item.vehicles)
-  );
+  const [selectedRoadId, setSelectedRoadId] = useState(roads[0].id);
 
-  const trafficReduction = Math.round(
-    ((currentTraffic - predictedTraffic) / currentTraffic) * 100
-  );
+  const selectedRoad =
+    roads.find((road) => road.id === selectedRoadId) ?? roads[0];
 
-  const predictedLevel = predictions[predictions.length - 1].level;
+  const forecast = forecasts[selectedRoad.id][horizon];
+  const maxFlow = Math.max(...forecast.map((item) => item.value));
+  const finalPoint = forecast[forecast.length - 1];
 
   return (
-    <div className="dashboard">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-icon">✦</div>
-          <div>
-            <h2>MOSAIC</h2>
-            <p>Federated Intelligence</p>
-          </div>
+    <div className="page-stack">
+      <section className="prediction-controls surface">
+        <div>
+          <span className="eyebrow">FORECAST EXPLORER</span>
+          <h2>Example outlook by corridor</h2>
+          <p>
+            Choose a road and time horizon to explore a sample forecast
+            scenario.
+          </p>
         </div>
 
-        <nav className="sidebar-nav">
-          <p className="nav-label">WORKSPACE</p>
-
-          <a className="nav-item" href="/">
-            <span>▦</span>
-            Overview
-          </a>
-
-          <a className="nav-item" href="/traffic-map">
-            <span>⌁</span>
-            Traffic Network
-          </a>
-
-          <a className="nav-item" href="/federated-learning">
-            <span>◈</span>
-            Federated Training
-          </a>
-
-          <a className="nav-item active" href="/traffic-prediction">
-            <span>⌁</span>
-            Predictions
-          </a>
-
-          <p className="nav-label second-label">SYSTEM</p>
-
-          <a className="nav-item" href="#">
-            <span>⚙</span>
-            Settings
-          </a>
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="status-dot" />
-          <span>System Ready</span>
-        </div>
-      </aside>
-
-      <main className="main-content">
-        <header className="topbar">
-          <div>
-            <p className="breadcrumb">
-              Workspace / Traffic Prediction
-            </p>
-
-            <h1>Traffic Prediction</h1>
-
-            <p className="page-subtitle">
-              Forecast traffic flow using federated intelligence.
-            </p>
-          </div>
-
-          <div className="topbar-actions">
-            <button className="icon-button" aria-label="Notifications">
-              ♧
-            </button>
-
-            <button className="profile-button">
-              <span className="profile-avatar">SK</span>
-              <span className="profile-name">Admin</span>
-              <span>⌄</span>
-            </button>
-          </div>
-        </header>
-
-        <section className="metrics-grid">
-          <div className="metric-card">
-            <div className="metric-top">
-              <p>Current Traffic</p>
-              <span className="metric-icon">↗</span>
-            </div>
-
-            <h2>{currentTraffic.toLocaleString()}</h2>
-
-            <p className="metric-subtitle">
-              Vehicles detected
-            </p>
-          </div>
-
-          <div className="metric-card">
-            <div className="metric-top">
-              <p>Predicted Traffic</p>
-              <span className="metric-icon">⌁</span>
-            </div>
-
-            <h2>{predictedTraffic.toLocaleString()}</h2>
-
-            <p className="metric-subtitle">
-              Next 15 minutes · {trafficReduction}% decrease
-            </p>
-          </div>
-
-          <div className="metric-card">
-            <div className="metric-top">
-              <p>Traffic Intensity</p>
-              <span className="metric-icon">◉</span>
-            </div>
-
-            <h2>{predictedLevel}</h2>
-
-            <p className="metric-subtitle">
-              Expected traffic level
-            </p>
-          </div>
-
-          <div className="metric-card">
-            <div className="metric-top">
-              <p>Forecast Horizon</p>
-              <span className="metric-icon">◷</span>
-            </div>
-
-            <h2>15 Min</h2>
-
-            <p className="metric-subtitle">
-              Prediction window
-            </p>
-          </div>
-        </section>
-
-        <section className="panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Traffic Flow Forecast</h2>
-              <p>
-                Expected vehicle count over the next 15 minutes
-              </p>
-            </div>
-
-            <span className="panel-badge">Forecast</span>
-          </div>
-
-          <div className="prediction-chart">
-            <div className="prediction-y-axis">
-              <span>1,500</span>
-              <span>1,000</span>
-              <span>500</span>
-              <span>0</span>
-            </div>
-
-            <div className="prediction-bars">
-              {predictions.map((item) => (
-                <div
-                  className="prediction-bar-column"
-                  key={item.time}
-                >
-                  <span className="prediction-bar-value">
-                    {item.vehicles.toLocaleString()}
-                  </span>
-
-                  <div className="prediction-bar-track">
-                    <div
-                      className={`prediction-bar ${item.level.toLowerCase()}`}
-                      style={{
-                        height: `${(item.vehicles / maxVehicles) * 100}%`,
-                      }}
-                    />
-                  </div>
-
-                  <span className="prediction-bar-time">
-                    {item.time}
-                  </span>
-
-                  <span
-                    className={`traffic-level ${item.level.toLowerCase()}`}
-                  >
-                    {item.level}
-                  </span>
-                </div>
+        <div className="prediction-selectors">
+          <label className="select-control">
+            Road
+            <select
+              value={selectedRoad.id}
+              onChange={(event) => setSelectedRoadId(event.target.value)}
+            >
+              {roads.map((road) => (
+                <option value={road.id} key={road.id}>
+                  {road.name}
+                </option>
               ))}
-            </div>
+            </select>
+          </label>
+
+          <fieldset className="segmented-control">
+            <legend>Forecast window</legend>
+            {horizons.map((value) => (
+              <button
+                type="button"
+                key={value}
+                className={horizon === value ? "active" : ""}
+                onClick={() => setHorizon(value)}
+                aria-pressed={horizon === value}
+              >
+                {value} min
+              </button>
+            ))}
+          </fieldset>
+        </div>
+      </section>
+
+      <div className="forecast-disclaimer">
+        <span aria-hidden="true">
+          <Icon name="sparkle" />
+        </span>
+        <p>
+          <strong>Sample scenario</strong> · {sampleDataNote} These values are
+          not model-generated predictions.
+        </p>
+      </div>
+
+      <section className="summary-grid prediction-summary-grid">
+        <article className="summary-card">
+          <div className="summary-card-heading">
+            <span>Current sample flow</span>
+            <span className="summary-icon">
+              <Icon name="predictions" />
+            </span>
           </div>
-        </section>
+          <strong>
+            {selectedRoad.flow.toLocaleString()} <em>veh/h</em>
+          </strong>
+          <small>{selectedRoad.name}</small>
+        </article>
 
-        <section className="panel prediction-table-panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Location-Based Predictions</h2>
-              <p>
-                Forecast details for monitored traffic locations
-              </p>
-            </div>
+        <article className="summary-card">
+          <div className="summary-card-heading">
+            <span>End of window</span>
+            <span className="summary-icon">
+              <Icon name="clock" />
+            </span>
+          </div>
+          <strong>
+            {finalPoint.value.toLocaleString()} <em>veh/h</em>
+          </strong>
+          <small>At +{horizon} minutes · example</small>
+        </article>
+
+        <article className="summary-card">
+          <div className="summary-card-heading">
+            <span>Scenario congestion</span>
+            <span className="summary-icon">
+              <Icon name="network" />
+            </span>
+          </div>
+          <strong>
+            <span
+              className={`congestion-dot ${finalPoint.level.toLowerCase()}`}
+            />
+            {finalPoint.level}
+          </strong>
+          <small>Sample classification</small>
+        </article>
+      </section>
+
+      <section className="surface forecast-chart-panel">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">TRAFFIC FLOW</span>
+            <h2>{selectedRoad.name} forecast</h2>
+            <p>
+              Example vehicle flow over the next {horizon} minutes
+            </p>
+          </div>
+          <span className="sample-pill">SAMPLE SCENARIO</span>
+        </div>
+
+        <div
+          className="forecast-chart"
+          role="img"
+          aria-label={`Sample flow scenario for ${selectedRoad.name}`}
+        >
+          <div className="forecast-scale">
+            <span>{maxFlow.toLocaleString()}</span>
+            <span>{Math.round(maxFlow * 0.66).toLocaleString()}</span>
+            <span>{Math.round(maxFlow * 0.33).toLocaleString()}</span>
+            <span>0</span>
           </div>
 
-          <div className="client-table-wrapper">
-            <table className="client-table">
-              <thead>
-                <tr>
-                  <th>Location</th>
-                  <th>Predicted Vehicles</th>
-                  <th>Traffic Level</th>
-                  <th>Confidence</th>
-                </tr>
-              </thead>
+          <div className="forecast-bars">
+            {forecast.map((point) => (
+              <div className="forecast-column" key={point.label}>
+                <strong className="forecast-value">
+                  {point.value.toLocaleString()}
+                </strong>
 
-              <tbody>
-                {locations.map((location) => (
-                  <tr key={location.name}>
-                    <td>
-                      <strong>{location.name}</strong>
-                    </td>
+                <div className="forecast-bar-track">
+                  <span
+                    className={`forecast-bar ${point.level.toLowerCase()}`}
+                    style={{
+                      height: `${(point.value / maxFlow) * 100}%`,
+                    }}
+                  />
+                </div>
 
-                    <td>{location.vehicles}</td>
+                <span className="forecast-time">{point.label}</span>
 
-                    <td>
-                      <span
-                        className={`traffic-level ${location.level.toLowerCase()}`}
-                      >
-                        {location.level}
-                      </span>
-                    </td>
-
-                    <td>
-                      <strong>{location.confidence}</strong>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                <span
+                  className={`traffic-level ${point.level.toLowerCase()}`}
+                >
+                  {point.level}
+                </span>
+              </div>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <footer className="dashboard-footer">
-          <span>MOSAIC · Federated Traffic Intelligence</span>
-          <span>Demo Data · Backend Integration Pending</span>
-        </footer>
-      </main>
+      <section className="surface">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">ROAD COMPARISON</span>
+            <h2>Corridor outlook</h2>
+            <p>
+              Sample flow and congestion across all three roads at the
+              selected horizon.
+            </p>
+          </div>
+          <span className="count-pill">+{horizon} minutes</span>
+        </div>
+
+        <div className="road-forecast-list">
+          {roads.map((road) => {
+            const roadForecast = forecasts[road.id][horizon];
+            const point = roadForecast[roadForecast.length - 1];
+
+            return (
+              <button
+                type="button"
+                className={`road-forecast-row ${
+                  road.id === selectedRoad.id ? "selected" : ""
+                }`}
+                key={road.id}
+                onClick={() => setSelectedRoadId(road.id)}
+              >
+                <span
+                  className={`road-marker ${point.level.toLowerCase()}`}
+                />
+
+                <span className="road-row-info">
+                  <strong>{road.name}</strong>
+                  <small>{road.junction}</small>
+                </span>
+
+                <span className="forecast-flow">
+                  {point.value.toLocaleString()} <small>veh/h</small>
+                </span>
+
+                <span
+                  className={`traffic-level ${point.level.toLowerCase()}`}
+                >
+                  {point.level}
+                </span>
+
+                <Icon className="row-chevron" name="arrow" />
+              </button>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

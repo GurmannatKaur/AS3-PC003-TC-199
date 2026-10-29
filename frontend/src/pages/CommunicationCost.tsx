@@ -46,9 +46,7 @@ export default function CommunicationCost() {
       <div className="page-header">
         <div>
           <p className="page-eyebrow">NETWORK EFFICIENCY</p>
-
           <h1>Communication Cost</h1>
-
           <p className="page-description">
             Evaluate the communication overhead involved in sharing model
             updates during federated traffic prediction.
@@ -62,42 +60,26 @@ export default function CommunicationCost() {
 
       <div className="stats-grid">
         <div className="stat-card">
-          <span className="stat-label">
-            Participating Clients
-          </span>
-
+          <span className="stat-label">Participating Clients</span>
           <h2>{participatingClients}</h2>
-
           <p>Connected locations</p>
         </div>
 
         <div className="stat-card">
-          <span className="stat-label">
-            Training Rounds
-          </span>
-
+          <span className="stat-label">Training Rounds</span>
           <h2>{totalRounds}</h2>
-
           <p>Model update rounds</p>
         </div>
 
         <div className="stat-card">
-          <span className="stat-label">
-            Update Size Per Round
-          </span>
-
+          <span className="stat-label">Update Size Per Round</span>
           <h2>{formatMB(totalUpdateSizeMB)}</h2>
-
           <p>Combined client updates</p>
         </div>
 
         <div className="stat-card">
-          <span className="stat-label">
-            Estimated Total Transfer
-          </span>
-
+          <span className="stat-label">Estimated Total Transfer</span>
           <h2>{formatMB(totalCommunicationMB)}</h2>
-
           <p>Across all training rounds</p>
         </div>
       </div>
@@ -106,22 +88,17 @@ export default function CommunicationCost() {
         <div className="panel-header">
           <div>
             <h2>Communication Overview</h2>
-
-            <p>
-              Comparison of data sharing approaches
-            </p>
+            <p>Comparison of data sharing approaches</p>
           </div>
         </div>
 
         <div className="info-grid">
           <div className="info-card">
             <h3>Centralized Learning</h3>
-
             <p>
               Raw traffic data from each location is transferred to a central
               server for training.
             </p>
-
             <div className="cost-indicator">
               <span>Data Transfer</span>
               <strong>High</strong>
@@ -130,12 +107,10 @@ export default function CommunicationCost() {
 
           <div className="info-card">
             <h3>Federated Learning</h3>
-
             <p>
               Local models are trained at each location. Only model updates
               are sent to the central server.
             </p>
-
             <div className="cost-indicator">
               <span>Data Transfer</span>
               <strong>Reduced</strong>
@@ -148,10 +123,7 @@ export default function CommunicationCost() {
         <div className="panel-header">
           <div>
             <h2>Client Communication Details</h2>
-
-            <p>
-              Illustrative values for the dashboard prototype
-            </p>
+            <p>Illustrative values for the dashboard prototype</p>
           </div>
         </div>
 
@@ -171,16 +143,10 @@ export default function CommunicationCost() {
               {communicationData.map((item) => (
                 <tr key={item.location}>
                   <td>{item.location}</td>
-
                   <td>{item.localData}</td>
-
                   <td>{formatMB(item.updateSizeMB)}</td>
-
                   <td>{item.rounds}</td>
-
-                  <td>
-                    {formatMB(item.updateSizeMB * item.rounds)}
-                  </td>
+                  <td>{formatMB(item.updateSizeMB * item.rounds)}</td>
                 </tr>
               ))}
             </tbody>
@@ -192,10 +158,7 @@ export default function CommunicationCost() {
         <div className="panel-header">
           <div>
             <h2>Communication Cost Formula</h2>
-
-            <p>
-              Estimate total transmitted model updates
-            </p>
+            <p>Estimate total transmitted model updates</p>
           </div>
         </div>
 
@@ -203,7 +166,6 @@ export default function CommunicationCost() {
           <p className="formula">
             Total Communication Cost = Update Size × Training Rounds × Clients
           </p>
-
           <p className="formula-note">
             For this prototype, the total is calculated by adding the update
             size of each client across its training rounds. Actual communication
@@ -215,7 +177,6 @@ export default function CommunicationCost() {
 
       <footer className="dashboard-footer">
         <span>MOSAIC · Federated Traffic Intelligence</span>
-
         <span>Illustrative Data · Backend Integration Pending</span>
       </footer>
     </div>

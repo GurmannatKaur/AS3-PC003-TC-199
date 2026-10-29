@@ -209,10 +209,8 @@ export default function EmergencyRouteSupport() {
           <h3>Emergency Support Notice</h3>
 
           <p>
-            This page currently displays prototype data. It is not connected
-            to emergency services or live navigation. Route recommendations
-            must be validated with real-time traffic and road data before
-            operational use.
+            Route examples use sample values and are not intended for live
+            emergency navigation.
           </p>
         </div>
       </section>

@@ -1,83 +1,60 @@
+
 import { NavLink } from "react-router-dom";
 import type { ReactNode } from "react";
+import Icon from "../common/Icon";
 
 interface AppLayoutProps {
   children: ReactNode;
 }
 
+const navigation = [
+  { to: "/", label: "Overview", icon: "overview", end: true },
+  { to: "/traffic-map", label: "Traffic Network", icon: "network" },
+  { to: "/clients", label: "Federated Clients", icon: "clients" },
+  { to: "/federated-learning", label: "Federated Training", icon: "training" },
+  { to: "/traffic-prediction", label: "Predictions", icon: "predictions" },
+  { to: "/communication-cost", label: "Communication Cost", icon: "network" },
+  { to: "/emergency-route-support", label: "Emergency Routes", icon: "network" },
+  { to: "/settings", label: "Settings", icon: "settings" },
+] as const;
+
 export default function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className="dashboard">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-icon">✦</div>
-          <div>
-            <h2>MOSAIC</h2>
-            <p>Federated Intelligence</p>
-          </div>
-        </div>
+    <div className="app-shell">
+      <header className="site-header">
+        <NavLink to="/" className="wordmark" aria-label="MOSAIC overview">
+          <strong>MOSAIC</strong>
+          <span>Traffic intelligence</span>
+        </NavLink>
 
-        <nav className="sidebar-nav">
-          <p className="nav-label">WORKSPACE</p>
-
-          <NavLink to="/" end className={({ isActive }) =>
-            `nav-item ${isActive ? "active" : ""}`
-          }>
-            <span>▦</span>
-            Overview
-          </NavLink>
-
-          <NavLink to="/traffic-map" className={({ isActive }) =>
-            `nav-item ${isActive ? "active" : ""}`
-          }>
-            <span>⌁</span>
-            Traffic Network
-          </NavLink>
-
-          <NavLink to="/federated-learning" className={({ isActive }) =>
-            `nav-item ${isActive ? "active" : ""}`
-          }>
-            <span>◈</span>
-            Federated Training
-          </NavLink>
-
-          <NavLink to="/traffic-prediction" className={({ isActive }) =>
-            `nav-item ${isActive ? "active" : ""}`
-          }>
-            <span>⌁</span>
-            Predictions
-          </NavLink>
-
-          <NavLink to="/communication-cost" className={({ isActive }) =>
-            `nav-item ${isActive ? "active" : ""}`
-          }>
-            <span>↗</span>
-            Communication Cost
-          </NavLink>
-
-          <NavLink to="/emergency-route-support" className={({ isActive }) =>
-            `nav-item ${isActive ? "active" : ""}`
-          }>
-            <span>✚</span>
-            Emergency Routes
-          </NavLink>
-
-          <p className="nav-label second-label">SYSTEM</p>
-
-          <a className="nav-item" href="#">
-            <span>⚙</span>
-            Settings
-          </a>
+        <nav className="top-navigation" aria-label="Main navigation">
+          {navigation.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={"end" in item ? item.end : false}
+              className={({ isActive }) =>
+                `nav-link ${isActive ? "active" : ""}`
+              }
+            >
+              <Icon name={item.icon} className="nav-icon" />
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
         </nav>
 
-        <div className="sidebar-bottom">
-          <div className="status-dot" />
-          <span>System Ready</span>
+        <div className="header-location">
+          <Icon name="location" />
+          <span>Chandigarh</span>
         </div>
-      </aside>
+      </header>
 
       <main className="main-content">
         {children}
+        <footer className="dashboard-footer">
+          <span>MOSAIC · Federated Traffic Intelligence</span>
+          <span>Sample scenarios are identified in the data views</span>
+        </footer>
       </main>
     </div>
   );
