@@ -1,0 +1,50 @@
+{
+  "dataset": "traffic_dataset.mat",
+  "sequence_length": 12,
+  "clients": 3,
+  "local_epochs": 3,
+  "federated_rounds": 3,
+  "centralized": {
+    "mae": 0.05027424171566963,
+    "rmse": 0.06729676446867953,
+    "r2": 0.8914036750793457
+  },
+  "federated_fedavg": {
+    "mae": 0.040447887033224106,
+    "rmse": 0.05707191208184587,
+    "r2": 0.9218962788581848
+  },
+  "communication": {
+    "estimated_total_bytes_upload_plus_download": 16324128,
+    "estimated_total_mb_upload_plus_download": 15.567901611328125,
+    "assumption": "Full model state uploaded and downloaded by each client each round; excludes protocol overhead."
+  },
+  "federated_round_training_losses": [
+    {
+      "round": 1,
+      "client_training_loss": [
+        0.01027697098574468,
+        0.013047797748675713,
+        0.01314031733916356
+      ]
+    },
+    {
+      "round": 2,
+      "client_training_loss": [
+        0.0037268002717090504,
+        0.0028448902930204687,
+        0.003086372260720684
+      ]
+    },
+    {
+      "round": 3,
+      "client_training_loss": [
+        0.0017058945876280113,
+        0.0017846540297166659,
+        0.0018847511203673023
+      ]
+    }
+  ],
+  "runtime_seconds": 8.52,
+  "note": "Evaluation uses the official test split. Sequence windows are created within each split to avoid crossing train/test boundaries."
+}

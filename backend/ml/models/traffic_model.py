@@ -24,6 +24,18 @@ class TrafficFlowModel(nn.Module):
         self.fc = nn.Linear(hidden_size, output_size)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if x.ndim != 3:
+            raise ValueError(
+                "TrafficFlowModel expects input shaped "
+                "(batch_size, sequence_length, input_size); "
+                f"got {tuple(x.shape)}"
+            )
+        if x.shape[-1] != self.lstm.input_size:
+            raise ValueError(
+                f"TrafficFlowModel expects {self.lstm.input_size} features "
+                f"per time step; got {x.shape[-1]}"
+            )
+
         lstm_output, _ = self.lstm(x)
 
         last_time_step = lstm_output[:, -1, :]

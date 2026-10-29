@@ -1,6 +1,6 @@
-import torch
+﻿import torch
 
-from app.ml.federated.aggregation import aggregate_model_weights
+from ml.federated.aggregation import aggregate_model_weights
 
 
 def fedavg(
