@@ -144,10 +144,7 @@ export default function TrafficPrediction() {
         <div>
           <span className="eyebrow">FORECAST EXPLORER</span>
           <h2>Corridor outlook</h2>
-          <p>
-            Set a flow input and location. The backend reports whether trained
-            weights or its sample calculation produced each value.
-          </p>
+          <p>Set a flow input and location to request a backend estimate.</p>
         </div>
 
         <div className="prediction-selectors">
@@ -237,10 +234,7 @@ export default function TrafficPrediction() {
                 ? "Trained-model inference"
                 : "Sample calculation"}
             </strong>
-            {" · "}
-            {selectedForecast.data_source}. Flow is user-provided; count and
-            speed inputs come from the backend's synthetic map and are not live
-            sensor readings.
+            {" · "}{selectedForecast.data_source}
           </p>
         </div>
       )}
@@ -343,10 +337,7 @@ export default function TrafficPrediction() {
               <div>
                 <span className="eyebrow">ROAD COMPARISON</span>
                 <h2>Corridor outlook</h2>
-                <p>
-                  Backend predictions for each sample location at the selected
-                  horizon.
-                </p>
+                <p>Backend predictions for each corridor at the selected horizon.</p>
               </div>
               <span className="count-pill">+{defaultHorizon} minutes</span>
             </div>

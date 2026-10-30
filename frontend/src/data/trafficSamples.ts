@@ -8,8 +8,6 @@ export interface TrafficRoad {
   congestion: CongestionLevel;
   averageSpeed: number;
   flow: number;
-  clientState: string;
-  modelState: string;
 }
 
 export const roads: TrafficRoad[] = [
@@ -21,8 +19,6 @@ export const roads: TrafficRoad[] = [
     congestion: "Low",
     averageSpeed: 38,
     flow: 420,
-    clientState: "Offline",
-    modelState: "Not deployed",
   },
   {
     id: "madhya-marg",
@@ -32,8 +28,6 @@ export const roads: TrafficRoad[] = [
     congestion: "Moderate",
     averageSpeed: 24,
     flow: 860,
-    clientState: "Offline",
-    modelState: "Not deployed",
   },
   {
     id: "uttar-marg",
@@ -43,13 +37,8 @@ export const roads: TrafficRoad[] = [
     congestion: "High",
     averageSpeed: 12,
     flow: 1240,
-    clientState: "Offline",
-    modelState: "Not deployed",
   },
 ];
-
-export const sampleDataNote =
-  "Illustrative traffic values · approximate road marker locations.";
 
 export const forecasts: Record<
   string,

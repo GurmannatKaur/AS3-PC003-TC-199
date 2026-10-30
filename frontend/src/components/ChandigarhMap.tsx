@@ -53,7 +53,7 @@ function getMapLocations(trafficNodes?: TrafficMapNode[]): MapLocation[] {
       congestion: node.traffic_level,
       averageSpeed: node.average_speed,
       vehicleCount: node.vehicle_count,
-      detail: `Sample client status: ${node.client_status} · sample traffic data`,
+      detail: node.client_status,
     }));
   }
 
@@ -64,7 +64,7 @@ function getMapLocations(trafficNodes?: TrafficMapNode[]): MapLocation[] {
     congestion: road.congestion,
     averageSpeed: road.averageSpeed,
     vehicleCount: road.flow,
-    detail: "Illustrative values · approximate marker location",
+    detail: "Traffic corridor",
   }));
 }
 

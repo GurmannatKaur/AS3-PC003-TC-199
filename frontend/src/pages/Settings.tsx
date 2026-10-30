@@ -70,9 +70,9 @@ export default function Settings() {
         <span className="eyebrow">ABOUT MOSAIC</span>
         <h2>Traffic intelligence, built collaboratively.</h2>
         <p>MOSAIC is a federated traffic prediction dashboard concept for exploring distributed road intelligence.</p>
-        <div className="about-meta"><span>Traffic scenarios</span><strong>Illustrative values</strong></div>
-        <div className="about-meta"><span>Road clients</span><strong>Offline</strong></div>
-        <div className="about-meta"><span>Model operations</span><strong>Unavailable</strong></div>
+        <p className="demo-disclosure">
+          Demonstration mode — traffic data and client activity are simulated.
+        </p>
       </aside>
     </div>
   );

@@ -12,7 +12,7 @@ SAMPLE_TRAFFIC_NODES = [
         "traffic_level": "High",
         "vehicle_count": 850,
         "average_speed": 18,
-        "client_status": "Online",
+        "client_status": "Configured",
     },
     {
         "id": "client_02",
@@ -22,7 +22,7 @@ SAMPLE_TRAFFIC_NODES = [
         "traffic_level": "Moderate",
         "vehicle_count": 520,
         "average_speed": 35,
-        "client_status": "Online",
+        "client_status": "Configured",
     },
     {
         "id": "client_03",
@@ -32,7 +32,7 @@ SAMPLE_TRAFFIC_NODES = [
         "traffic_level": "Low",
         "vehicle_count": 240,
         "average_speed": 48,
-        "client_status": "Online",
+        "client_status": "Configured",
     },
     {
         "id": "client_04",
@@ -42,7 +42,7 @@ SAMPLE_TRAFFIC_NODES = [
         "traffic_level": "High",
         "vehicle_count": 910,
         "average_speed": 15,
-        "client_status": "Offline",
+        "client_status": "Configured",
     },
 ]
 
@@ -57,7 +57,7 @@ def get_traffic_map(
         {
             **node,
             "status": node["traffic_level"].lower(),
-            "online": node["client_status"] == "Online",
+            "online": False,
         }
         for node in SAMPLE_TRAFFIC_NODES
     ]
@@ -74,12 +74,12 @@ def get_traffic_map(
         nodes = [
             node
             for node in nodes
-            if node["online"]
+            if node["client_status"] == "Online"
         ]
 
     return {
         "nodes": nodes,
         "total_nodes": len(nodes),
-        "data_source": "Synthetic sample data",
+        "data_source": "demonstration",
         "is_live": False,
     }

@@ -188,7 +188,6 @@ export default function EmergencyRouteRouting({
               <option value="fastest">Fastest · available road options</option>
               <option value="shortest">Shortest · among returned options</option>
             </select>
-            <p>Congestion-aware routing is unavailable without a traffic-data provider.</p>
           </div>
 
           <div className="route-form-actions">
@@ -201,7 +200,6 @@ export default function EmergencyRouteRouting({
               Clear Route
             </button>
           </div>
-          <p className="routing-data-note">Selected coordinates are sent to the OpenStreetMap OSRM public routing service. It uses standard driving directions, not emergency-vehicle or live traffic routing.</p>
           {errorMessage && <p className="routing-error" role="alert">{errorMessage}</p>}
         </form>
 
@@ -248,7 +246,7 @@ export default function EmergencyRouteRouting({
                 </div>
               )}
               <div className="route-accuracy-note">
-                Standard driving directions from OpenStreetMap. Route times do not include live traffic or emergency priority.
+                Standard driving directions; no live traffic or emergency priority.
               </div>
             </>
           ) : (

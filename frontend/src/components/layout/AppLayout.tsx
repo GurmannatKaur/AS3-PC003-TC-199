@@ -51,7 +51,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
         {children}
         <footer className="dashboard-footer">
           <span>MOSAIC · Federated Traffic Intelligence</span>
-          <span>Traffic values are illustrative; models and clients are offline</span>
         </footer>
       </main>
     </div>

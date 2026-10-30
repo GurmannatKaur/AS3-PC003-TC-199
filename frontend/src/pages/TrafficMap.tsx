@@ -189,7 +189,7 @@ export default function TrafficMap() {
           </span>
           <div>
             <strong>Chandigarh, India</strong>
-            <small>Backend traffic locations · sample data</small>
+            <small>Traffic network</small>
           </div>
         </div>
 
@@ -214,7 +214,7 @@ export default function TrafficMap() {
               />
               <span>
                 <strong>{road.name}</strong>
-                <small>Sample status: {road.client_status}</small>
+                <small>{road.client_status}</small>
               </span>
               <span
                 className={`traffic-level ${road.traffic_level.toLowerCase()}`}
@@ -235,15 +235,12 @@ export default function TrafficMap() {
               <small>
                 {selectedRoad.traffic_level} traffic ·{" "}
                 {formatSpeed(selectedRoad.average_speed, speedUnit)} ·{" "}
-                {selectedRoad.vehicle_count.toLocaleString()} vehicles · sample
+                {selectedRoad.vehicle_count.toLocaleString()} vehicles
               </small>
             </span>
           </div>
         )}
 
-        <span className="map-location-note">
-          Backend-provided approximate locations · sample data, not live
-        </span>
       </section>
 
       <section className="surface">
@@ -251,10 +248,6 @@ export default function TrafficMap() {
           <div>
             <span className="eyebrow">NETWORK OVERVIEW</span>
             <h2>Traffic corridors</h2>
-            <p>
-              Traffic locations returned by the backend. Values are sample data,
-              not live sensor measurements.
-            </p>
           </div>
           <span className="count-pill">{trafficNodes.length} locations</span>
         </div>
@@ -284,7 +277,7 @@ export default function TrafficMap() {
                   </span>
                 </span>
                 <strong>{node.name}</strong>
-                <small>{node.client_status} client</small>
+                <small>{node.client_status}</small>
                 <span className="road-card-foot">
                   <span>{formatSpeed(node.average_speed, speedUnit)}</span>
                   <span>{node.vehicle_count.toLocaleString()} vehicles</span>

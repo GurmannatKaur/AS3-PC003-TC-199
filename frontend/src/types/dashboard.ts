@@ -23,8 +23,7 @@ export interface TrafficMapNode {
   status: "high" | "moderate" | "low";
   vehicle_count: number;
   average_speed: number;
-  client_status: "Online" | "Offline";
-  online: boolean;
+  client_status: "Configured";
 }
 
 export interface TrafficMapResponse {

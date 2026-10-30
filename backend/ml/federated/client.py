@@ -5,6 +5,10 @@ from torch.utils.data import DataLoader, TensorDataset
 from ml.models.traffic_model import TrafficFlowModel
 
 
+class TrainingStopped(Exception):
+    """Raised when a federated run is cancelled during local training."""
+
+
 def train_client(
     client_id: str,
     X_train,
@@ -13,6 +17,7 @@ def train_client(
     global_weights=None,
     epochs: int | None = None,
     learning_rate: float | None = None,
+    stop_event=None,
 ) -> dict:
     epochs = epochs or 3
     learning_rate = learning_rate or 0.001
@@ -64,8 +69,12 @@ def train_client(
 
     model.train()
     for _ in range(epochs):
+        if stop_event is not None and stop_event.is_set():
+            raise TrainingStopped()
         total_loss = 0.0
         for batch_X, batch_y in loader:
+            if stop_event is not None and stop_event.is_set():
+                raise TrainingStopped()
             optimizer.zero_grad()
             predictions = model(batch_X)
             loss = criterion(predictions, batch_y)

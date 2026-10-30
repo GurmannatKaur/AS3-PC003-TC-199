@@ -72,7 +72,7 @@ def predict_traffic(request: TrafficPredictionRequest):
         predicted_flow = request.current_flow * (
             1 - min(request.horizon_minutes * 0.01, 0.15)
         )
-        data_source = "Sample calculation"
+        data_source = "Rule-based baseline calculation"
 
     congestion = classify_congestion(
         traffic_flow=predicted_flow,

@@ -45,22 +45,42 @@ def test_sample_api_routes_and_error_envelope():
     assert dashboard.status_code == 200 and dashboard.json()["success"] is True
     assert traffic_map.status_code == 200
     assert all(node["status"] == "moderate" for node in traffic_map.json()["data"]["nodes"])
+    assert map_without_offline.json()["data"]["nodes"] == []
     assert all(
-        node["online"]
-        for node in map_without_offline.json()["data"]["nodes"]
+        node["client_status"] == "Configured" and node["online"] is False
+        for node in traffic_map.json()["data"]["nodes"]
     )
-    assert any(
-        item["status"] == "offline"
+    assert all(
+        item["status"] in {
+            "configured",
+            "waiting",
+            "training",
+            "completed",
+            "stopped",
+            "failed",
+        }
+        and item["execution_mode"] == "local_demo"
         for item in clients.json()["data"]["clients"]
     )
     assert prediction.status_code == 200
     assert prediction.json()["data"]["horizon_minutes"] == 10
     assert prediction_feed.status_code == 200
     assert prediction_feed.json()["data"]["predictions"][0]["horizon_minutes"] == 15
-    assert federated_status.json()["data"]["status"] == "IDLE"
-    assert federated_rounds.json()["data"]["rounds"] == []
+    assert federated_status.json()["data"]["status"] in {
+        "IDLE",
+        "TRAINING",
+        "STOPPING",
+        "STOPPED",
+        "COMPLETED",
+        "FAILED",
+    }
+    assert federated_rounds.json()["data"]["total_rounds"] == len(
+        federated_rounds.json()["data"]["rounds"]
+    )
     assert communication.json()["success"] is True
-    assert communication_rounds.json()["data"]["rounds"] == []
+    assert communication_rounds.json()["data"]["total_rounds"] == len(
+        communication_rounds.json()["data"]["rounds"]
+    )
     assert comparison.status_code == 200
     assert congestion.status_code == 200
     assert route.json()["data"]["data_source"] == "sample"

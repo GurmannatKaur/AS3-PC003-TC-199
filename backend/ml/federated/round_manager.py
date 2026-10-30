@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class TrainingLifecycle:
@@ -61,7 +61,7 @@ class FederatedRoundManager:
             round_number=round_number,
             status="running",
             participating_clients=participating_clients,
-            started_at=datetime.utcnow(),
+            started_at=datetime.now(timezone.utc),
         )
 
         self.rounds.append(round_info)
@@ -85,7 +85,7 @@ class FederatedRoundManager:
         round_info.total_samples = total_samples
         round_info.training_loss = training_loss
         round_info.communication_cost_mb = communication_cost_mb
-        round_info.completed_at = datetime.utcnow()
+        round_info.completed_at = datetime.now(timezone.utc)
 
         return round_info
 

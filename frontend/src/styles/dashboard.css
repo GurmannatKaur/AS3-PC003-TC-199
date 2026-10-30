@@ -1340,6 +1340,7 @@ button.summary-card:hover {
   max-width: 680px;
 }
 
+.training-hero-copy h1,
 .training-hero-copy h2 {
   margin: 8px 0;
   color: #263d58;
@@ -1610,6 +1611,45 @@ button.summary-card:hover {
 .training-control-actions button:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+
+.training-progress-summary {
+  margin-top: 20px;
+}
+
+.training-progress-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: #526d80;
+  font-size: 10px;
+}
+
+.training-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7f0f5;
+}
+
+.training-progress-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #24b797, #26a4cb);
+  transition: width 250ms ease;
+}
+
+.demo-disclosure {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border: 1px solid #e5e0f4;
+  border-radius: 12px;
+  color: #6b5d91;
+  background: #f7f4ff;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 @keyframes api-state-spin {

@@ -41,8 +41,8 @@ export default function Clients({ onNavigate }: ClientsProps) {
     return () => controller.abort();
   }, [loadClients, reloadCounter]);
 
-  const connectedCount =
-    clientData?.clients.filter((client) => client.status.toLowerCase() === "online")
+  const completedCount =
+    clientData?.clients.filter((client) => client.last_completed_round > 0)
       .length ?? 0;
 
   return (
@@ -58,27 +58,27 @@ export default function Clients({ onNavigate }: ClientsProps) {
       <section className="summary-grid clients-summary">
         <article className="summary-card">
           <div className="summary-card-heading">
-            <span>Configured clients</span>
+            <span>Local partitions</span>
             <span className="summary-icon"><Icon name="clients" /></span>
           </div>
           <strong>{clientData?.total_clients.toString().padStart(2, "0") ?? "—"}</strong>
-          <small>From the federated clients endpoint</small>
+          <small>Available for local training</small>
         </article>
         <article className="summary-card">
           <div className="summary-card-heading">
-            <span>Connected</span>
-            <span className="summary-icon"><Icon name="network" /></span>
-          </div>
-          <strong>{clientData ? connectedCount.toString().padStart(2, "0") : "—"}</strong>
-          <small>Reported online by the API</small>
-        </article>
-        <article className="summary-card">
-          <div className="summary-card-heading">
-            <span>Local models</span>
+            <span>Completed locally</span>
             <span className="summary-icon"><Icon name="training" /></span>
           </div>
-          <strong>—</strong>
-          <small>Training service is not connected</small>
+          <strong>{clientData ? completedCount.toString().padStart(2, "0") : "—"}</strong>
+          <small>Partitions with a completed round</small>
+        </article>
+        <article className="summary-card">
+          <div className="summary-card-heading">
+            <span>Execution mode</span>
+            <span className="summary-icon"><Icon name="network" /></span>
+          </div>
+          <strong>{clientData?.execution_mode === "local_demo" ? "Local" : "—"}</strong>
+          <small>In-process client partitions</small>
         </article>
       </section>
 
@@ -86,13 +86,9 @@ export default function Clients({ onNavigate }: ClientsProps) {
         <div className="section-heading">
           <div>
             <span className="eyebrow">CLIENT DIRECTORY</span>
-            <h2>Federated client records</h2>
-            <p>Client names, statuses, and data sources are returned by the backend.</p>
+            <h2>Training partitions</h2>
           </div>
-          <span className="status-pill planned">
-            <span />
-            {connectedCount > 0 ? "API reports connected clients" : "No live connections"}
-          </span>
+          <span className="count-pill">{clientData?.total_clients ?? 0} configured</span>
         </div>
 
         {clientData && clientData.clients.length === 0 ? (
@@ -101,32 +97,30 @@ export default function Clients({ onNavigate }: ClientsProps) {
           <div className="client-list">
             {clientData?.clients.map((client, index) => {
               const expanded = detailsId === client.client_id;
-              const isOnline = client.status.toLowerCase() === "online";
               return (
                 <article
                   className={`client-card ${expanded ? "is-selected" : ""}`}
                   key={client.client_id}
                 >
                   <div className="client-card-main">
-                    <span className={`client-avatar ${isOnline ? "low" : "moderate"}`}>
+                    <span className="client-avatar moderate">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <div className="client-road-name">
                       <span className="eyebrow">{client.client_id}</span>
                       <h3>{client.name}</h3>
-                      <p>{client.data_source}</p>
                     </div>
                     <div className="client-card-field">
-                      <small>API status</small>
+                      <small>Training windows</small>
+                      <strong>{client.training_samples}</strong>
+                    </div>
+                    <div className="client-card-field">
+                      <small>Last completed round</small>
+                      <strong>{client.last_completed_round || "—"}</strong>
+                    </div>
+                    <div className="client-card-field">
+                      <small>Run status</small>
                       <strong>{client.status}</strong>
-                    </div>
-                    <div className="client-card-field">
-                      <small>Data source</small>
-                      <strong>{client.data_source}</strong>
-                    </div>
-                    <div className="client-card-field">
-                      <small>Model training</small>
-                      <span className="status-pill offline"><span />Not connected</span>
                     </div>
                     <button
                       className="button-secondary client-details-button"
@@ -143,9 +137,9 @@ export default function Clients({ onNavigate }: ClientsProps) {
                   {expanded && (
                     <div className="client-details">
                       <div><small>Client ID</small><strong>{client.client_id}</strong></div>
-                      <div><small>Reported status</small><strong>{client.status}</strong></div>
-                      <div><small>Reported source</small><strong>{client.data_source}</strong></div>
-                      <p>Client records are sample configuration, not active network connections.</p>
+                      <div><small>Local run status</small><strong>{client.status}</strong></div>
+                      <div><small>Training windows</small><strong>{client.training_samples}</strong></div>
+                      <div><small>Last completed round</small><strong>{client.last_completed_round || "—"}</strong></div>
                       <button className="text-button" type="button" onClick={onNavigate}>
                         View traffic map <Icon name="arrow" />
                       </button>

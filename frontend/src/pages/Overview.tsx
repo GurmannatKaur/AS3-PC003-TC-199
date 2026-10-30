@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/dashboard.css";
@@ -7,44 +6,13 @@ import EmptyState from "../components/common/EmptyState";
 import ErrorState from "../components/common/ErrorState";
 import LoadingState from "../components/common/LoadingState";
 import { getDashboard, getTrafficMap } from "../api/dashboardApi";
-import { roads } from "../data/trafficSamples";
 import { formatSpeed, usePreferences } from "../data/preferences";
 import Icon from "../components/common/Icon";
 import DecorativeCarAnimation from "../components/dashboard/DecorativeCarAnimation";
 import type { DashboardResponse, TrafficMapResponse } from "../types/dashboard";
 
-const trend = [38, 48, 44, 61, 58, 72, 64, 82, 77, 91, 83, 96];
-
-const workflow = [
-  {
-    number: "01",
-    title: "Local Training",
-    description: "Each client trains its model using local traffic data.",
-    status: "Planned",
-  },
-  {
-    number: "02",
-    title: "Model Updates",
-    description: "Clients share model updates with the coordinating server.",
-    status: "Planned",
-  },
-  {
-    number: "03",
-    title: "Global Aggregation",
-    description: "The server combines updates to improve the global model.",
-    status: "Planned",
-  },
-  {
-    number: "04",
-    title: "Traffic Prediction",
-    description: "The global model can support future traffic predictions.",
-    status: "Planned",
-  },
-];
-
 export default function Overview() {
   const { speedUnit } = usePreferences();
-  const selectedRoad = roads[0];
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [trafficMap, setTrafficMap] = useState<TrafficMapResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -77,18 +45,21 @@ export default function Overview() {
     return () => controller.abort();
   }, [reloadCounter]);
 
+  const selectedRoad = trafficMap?.nodes[0];
+  const metrics = dashboard?.evaluation_metrics;
+
   return (
     <div className="page-stack page-overview">
       <header className="page-intro">
         <div className="page-intro-copy">
           <span className="eyebrow">FEDERATED TRAFFIC INTELLIGENCE</span>
-          <h1>Dashboard Overview</h1>
+          <h1>Dashboard overview</h1>
         </div>
       </header>
 
       <DecorativeCarAnimation />
 
-      {isLoading && <LoadingState message="Loading dashboard data…" />}
+      {isLoading && <LoadingState message="Loading dashboard…" />}
       {errorMessage && (
         <ErrorState
           message={errorMessage}
@@ -106,19 +77,19 @@ export default function Overview() {
           <div className="map-stat-chip chip-blue">
             <span><Icon name="network" /></span>
             <strong>{trafficMap?.total_nodes.toString().padStart(2, "0") ?? "—"}</strong>
-            <small>sample locations</small>
+            <small>network locations</small>
           </div>
 
           <div className="map-stat-chip chip-mint">
             <span><Icon name="clients" /></span>
             <strong>{dashboard?.participating_clients.toString().padStart(2, "0") ?? "—"}</strong>
-            <small>configured clients</small>
+            <small>local partitions</small>
           </div>
 
           <div className="map-stat-chip chip-yellow">
             <span><Icon name="clock" /></span>
             <strong>5–15</strong>
-            <small>min prediction</small>
+            <small>min forecast</small>
           </div>
         </div>
 
@@ -126,53 +97,53 @@ export default function Overview() {
           <span className="map-caption-pulse" />
           <div>
             <strong>Chandigarh road network</strong>
-            <small>{trafficMap?.data_source ?? "Loading sample traffic locations"}</small>
+            <small>Traffic locations</small>
           </div>
         </div>
       </section>
 
       {!isLoading && !errorMessage && trafficMap?.nodes.length === 0 && (
-        <EmptyState message="No traffic locations are available from the backend." />
+        <EmptyState message="No traffic locations are available." />
       )}
 
       <section className="summary-grid">
         <article className="summary-card">
           <div className="summary-card-heading">
-            <span>Training rounds</span>
+            <span>Current training round</span>
             <span className="summary-icon"><Icon name="training" /></span>
           </div>
           <strong>{dashboard?.training_round ?? "—"}</strong>
-          <small>{dashboard?.data_source ?? "Awaiting backend data"}</small>
+          <small>Federated training</small>
         </article>
 
         <article className="summary-card">
           <div className="summary-card-heading">
-            <span>Configured clients</span>
+            <span>Local partitions</span>
             <span className="summary-icon"><Icon name="clients" /></span>
           </div>
           <strong>{dashboard?.participating_clients.toString().padStart(2, "0") ?? "—"}</strong>
-          <small>Backend-reported clients</small>
+          <small>Configured for training</small>
         </article>
 
         <article className="summary-card">
           <div className="summary-card-heading">
-            <span>Traffic outlook</span>
+            <span>Forecast status</span>
             <span className="summary-icon"><Icon name="predictions" /></span>
           </div>
           <strong>{dashboard?.predicted_traffic_status ?? "—"}</strong>
-          <small>{dashboard?.data_source ?? "Awaiting backend data"}</small>
+          <small>Traffic prediction service</small>
         </article>
 
         <article className="summary-card">
           <div className="summary-card-heading">
-            <span>Model status</span>
+            <span>Global model</span>
             <span className="summary-icon"><Icon name="clock" /></span>
           </div>
           <strong>{dashboard?.global_model_status ?? "—"}</strong>
           <small>
-            {dashboard && dashboard.evaluation_metrics.mae !== null
-              ? `MAE ${dashboard.evaluation_metrics.mae}`
-              : "No evaluated model metrics"}
+            {metrics?.mae !== null && metrics?.mae !== undefined
+              ? `MAE ${metrics.mae.toFixed(4)}`
+              : "No evaluation metrics"}
           </small>
         </article>
       </section>
@@ -180,31 +151,28 @@ export default function Overview() {
       <section className="overview-road-section">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">THREE ROADS, ONE CITY</span>
-            <h2>Get to know your corridors</h2>
-            <p>Explore illustrative traffic conditions for each route.</p>
+            <span className="eyebrow">ROAD NETWORK</span>
+            <h2>Traffic corridors</h2>
           </div>
           <Link className="button-link" to="/traffic-map">
-            Explore the network <Icon name="arrow" />
+            Explore network <Icon name="arrow" />
           </Link>
         </div>
 
         <div className="overview-road-grid">
-          {roads.map((road) => (
+          {trafficMap?.nodes.map((road) => (
             <article className={`overview-road-card road-${road.id}`} key={road.id}>
               <span className="road-card-top">
-                <span className={`road-marker ${road.congestion.toLowerCase()}`} />
-                <span className={`traffic-level ${road.congestion.toLowerCase()}`}>
-                  {road.congestion}
+                <span className={`road-marker ${road.traffic_level.toLowerCase()}`} />
+                <span className={`traffic-level ${road.traffic_level.toLowerCase()}`}>
+                  {road.traffic_level}
                 </span>
               </span>
-
               <strong>{road.name}</strong>
-              <small>{road.junction}</small>
-
+              <small>{road.client_status}</small>
               <span className="road-card-foot">
-                <span>{formatSpeed(road.averageSpeed, speedUnit)}</span>
-                <span>{road.flow.toLocaleString()} veh/h</span>
+                <span>{formatSpeed(road.average_speed, speedUnit)}</span>
+                <span>{road.vehicle_count.toLocaleString()} vehicles</span>
               </span>
             </article>
           ))}
@@ -215,65 +183,34 @@ export default function Overview() {
         <article className="flow-card">
           <div className="section-heading">
             <div>
-              <span className="eyebrow">TRAFFIC RHYTHM</span>
-              <h2>A day on the move</h2>
-              <p>Illustrative traffic-flow pattern · not sensor history</p>
+              <span className="eyebrow">MODEL EVALUATION</span>
+              <h2>Global model performance</h2>
             </div>
           </div>
-
-          <div
-            className="trend-chart"
-            role="img"
-            aria-label="Illustrative traffic-flow pattern increasing through the day"
-          >
-            <div className="chart-y-labels">
-              <span>Busy</span>
-              <span>Steady</span>
-              <span>Clear</span>
+          {metrics?.mae !== null && metrics?.mae !== undefined ? (
+            <div className="selected-flow-stats">
+              <span><small>MAE</small><strong>{metrics.mae.toFixed(4)}</strong></span>
+              <span><small>RMSE</small><strong>{metrics.rmse?.toFixed(4) ?? "—"}</strong></span>
+              <span><small>R²</small><strong>{metrics.r2?.toFixed(4) ?? "—"}</strong></span>
             </div>
-
-            <div className="chart-bars">
-              {trend.map((height, index) => (
-                <span
-                  key={index}
-                  className="chart-bar"
-                  style={{
-                    height: `${height}%`,
-                    animationDelay: `${index * 35}ms`,
-                  }}
-                />
-              ))}
-            </div>
-
-            <div className="chart-x-labels">
-              <span>6 AM</span>
-              <span>10 AM</span>
-              <span>2 PM</span>
-              <span>6 PM</span>
-              <span>10 PM</span>
-            </div>
-          </div>
+          ) : (
+            <EmptyState message="Model metrics will appear after training." />
+          )}
         </article>
 
         <article className="federated-card">
           <span className="federated-orb" aria-hidden="true">
             <Icon name="sparkle" />
           </span>
-          <span className="eyebrow">FEDERATED NETWORK</span>
-          <h2>Local roads. Shared intelligence.</h2>
+          <span className="eyebrow">FEDERATED TRAINING</span>
+          <h2>{dashboard?.global_model_status ?? "Loading status"}</h2>
           <p>
-            Road clients represent distributed traffic locations. Model
-            training and aggregation are not yet available.
+            {dashboard?.training_round
+              ? `${dashboard.training_round} training rounds recorded.`
+              : "Run a local training session and review its results."}
           </p>
-
-          <div className="federated-road-pills">
-            {roads.map((road) => (
-              <span key={road.id}>{road.name}</span>
-            ))}
-          </div>
-
           <Link className="button-link" to="/federated-learning">
-            How federated learning works <Icon name="arrow" />
+            View training results <Icon name="arrow" />
           </Link>
         </article>
 
@@ -281,53 +218,26 @@ export default function Overview() {
           <span className="selected-flow-icon" aria-hidden="true">
             <Icon name="predictions" />
           </span>
-          <span className="eyebrow">SELECTED ROAD</span>
-          <h2>{selectedRoad.name}</h2>
-          <p>{selectedRoad.junction} · Chandigarh</p>
-
-          <div className="selected-flow-stats">
-            <span>
-              <small>Average speed</small>
-              <strong>{formatSpeed(selectedRoad.averageSpeed, speedUnit)}</strong>
-            </span>
-            <span>
-              <small>Illustrative flow</small>
-              <strong>{selectedRoad.flow.toLocaleString()} veh/h</strong>
-            </span>
-          </div>
-
+          <span className="eyebrow">SELECTED LOCATION</span>
+          <h2>{selectedRoad?.name ?? "No location selected"}</h2>
+          <p>{selectedRoad?.traffic_level ?? "Traffic data unavailable"}</p>
+          {selectedRoad && (
+            <div className="selected-flow-stats">
+              <span>
+                <small>Average speed</small>
+                <strong>{formatSpeed(selectedRoad.average_speed, speedUnit)}</strong>
+              </span>
+              <span>
+                <small>Vehicles</small>
+                <strong>{selectedRoad.vehicle_count.toLocaleString()}</strong>
+              </span>
+            </div>
+          )}
           <Link className="button-primary" to="/traffic-prediction">
             Explore predictions <Icon name="arrow" />
           </Link>
         </article>
       </section>
-
-      <section className="surface">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">FEDERATED WORKFLOW</span>
-            <h2>From local learning to shared intelligence</h2>
-            <p>This is the intended workflow, not a record of completed training.</p>
-          </div>
-          <span className="count-pill">4 stages</span>
-        </div>
-
-        <div className="workflow-grid">
-          {workflow.map((step) => (
-            <article className="workflow-card" key={step.number}>
-              <span className="workflow-step-number">{step.number}</span>
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
-              <span className="status-pill planned">
-                <span />
-                {step.status}
-              </span>
-            </article>
-          ))}
-        </div>
-      </section>
-
-
     </div>
   );
 }

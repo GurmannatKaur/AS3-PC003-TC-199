@@ -1,44 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getFederatedClients, getFederatedRounds, getFederatedStatus, startFederatedTraining, stopFederatedTraining } from "../api/federatedApi";
+import {
+  getFederatedClients,
+  getFederatedRounds,
+  getFederatedStatus,
+  startFederatedTraining,
+  stopFederatedTraining,
+} from "../api/federatedApi";
 import EmptyState from "../components/common/EmptyState";
 import ErrorState from "../components/common/ErrorState";
 import Icon from "../components/common/Icon";
 import LoadingState from "../components/common/LoadingState";
-import { sampleDataNote } from "../data/trafficSamples";
 import type {
   FederatedClientsResponse,
+  FederatedMetrics,
   FederatedRoundsResponse,
   FederatedStatusResponse,
   FederatedTrainingRequest,
 } from "../types/federated";
-
-const stages = [
-  {
-    number: "01",
-    name: "Local training",
-    detail: "Each road client trains using locally held traffic data.",
-    state: "Planned",
-  },
-  {
-    number: "02",
-    name: "Model updates",
-    detail: "Clients submit model parameters to the coordinating server.",
-    state: "Planned",
-  },
-  {
-    number: "03",
-    name: "Aggregation",
-    detail: "The server combines model updates into a global model.",
-    state: "Planned",
-  },
-  {
-    number: "04",
-    name: "Distribution",
-    detail: "The global model is returned to participating clients.",
-    state: "Planned",
-  },
-];
 
 const initialConfiguration: FederatedTrainingRequest = {
   rounds: 5,
@@ -46,6 +25,26 @@ const initialConfiguration: FederatedTrainingRequest = {
   learning_rate: 0.001,
   num_clients: 4,
 };
+
+const activeStatuses = new Set(["STARTING", "TRAINING", "STOPPING"]);
+const phaseLabels: Record<string, string> = {
+  initializing: "Preparing run",
+  local_training: "Local model training",
+  aggregating: "Aggregating updates",
+  evaluating: "Evaluating global model",
+  completed: "Completed",
+  stopped: "Stopped",
+  failed: "Failed",
+  stopping: "Stopping after active update",
+};
+
+function formatMetric(value: number | null | undefined) {
+  return value == null ? "—" : value.toFixed(4);
+}
+
+function isActive(status: FederatedStatusResponse | null) {
+  return status !== null && activeStatuses.has(status.status);
+}
 
 export default function FederatedLearning() {
   const [status, setStatus] = useState<FederatedStatusResponse | null>(null);
@@ -59,7 +58,6 @@ export default function FederatedLearning() {
   const [actionMessage, setActionMessage] = useState("");
 
   const loadData = useCallback(async (signal?: AbortSignal) => {
-    setErrorMessage("");
     try {
       const [statusResponse, roundsResponse, clientsResponse] =
         await Promise.all([
@@ -71,10 +69,13 @@ export default function FederatedLearning() {
       setStatus(statusResponse);
       setRounds(roundsResponse);
       setClients(clientsResponse);
+      setErrorMessage("");
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
       setErrorMessage(
-        error instanceof Error ? error.message : "Federated status could not be loaded.",
+        error instanceof Error
+          ? error.message
+          : "Federated training status could not be loaded.",
       );
     } finally {
       if (!signal?.aborted) setIsLoading(false);
@@ -87,12 +88,16 @@ export default function FederatedLearning() {
     return () => controller.abort();
   }, [loadData]);
 
+  useEffect(() => {
+    if (!isActive(status)) return;
+    const interval = window.setInterval(() => void loadData(), 1200);
+    return () => window.clearInterval(interval);
+  }, [loadData, status]);
+
   const updateConfiguration = (
     field: keyof FederatedTrainingRequest,
     value: number,
-  ) => {
-    setConfiguration((current) => ({ ...current, [field]: value }));
-  };
+  ) => setConfiguration((current) => ({ ...current, [field]: value }));
 
   const startTraining = async () => {
     setBusyAction("start");
@@ -100,11 +105,13 @@ export default function FederatedLearning() {
     setActionMessage("");
     try {
       const response = await startFederatedTraining(configuration);
-      setActionMessage(response.note ?? response.message);
+      setActionMessage(response.message);
       await loadData();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Training configuration was rejected.",
+        error instanceof Error
+          ? error.message
+          : "Federated training could not be started.",
       );
     } finally {
       setBusyAction(null);
@@ -121,20 +128,35 @@ export default function FederatedLearning() {
       await loadData();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "The training request could not be stopped.",
+        error instanceof Error
+          ? error.message
+          : "Federated training could not be stopped.",
       );
     } finally {
       setBusyAction(null);
     }
   };
 
-  const configuredOnly = status?.status.toLowerCase() === "configured";
+  const active = isActive(status);
+  const metrics: FederatedMetrics | null = status?.model_metrics ?? null;
+  const completedCount = rounds?.rounds.length ?? 0;
+  const progress = status?.total_rounds
+    ? Math.min(100, (completedCount / status.total_rounds) * 100)
+    : 0;
+  const workLimitExceeded =
+    configuration.rounds *
+      configuration.local_epochs *
+      configuration.num_clients >
+    500;
 
   return (
     <div className="page-stack">
-      {isLoading && <LoadingState message="Loading federated status…" />}
+      {isLoading && <LoadingState message="Loading federated training…" />}
       {errorMessage && (
         <ErrorState message={errorMessage} onRetry={() => void loadData()} />
+      )}
+      {status?.status === "FAILED" && status.last_error && (
+        <ErrorState message={`Training failed: ${status.last_error}`} />
       )}
       {actionMessage && (
         <div className="api-state" role="status" aria-live="polite">
@@ -145,26 +167,24 @@ export default function FederatedLearning() {
       <section className="training-hero surface">
         <div className="training-hero-copy">
           <span className="eyebrow">MODEL COLLABORATION</span>
-          <h2>Intelligence, without moving raw data</h2>
+          <h1>Federated training</h1>
           <p>
-            Federated learning lets road clients learn locally and share model
-            updates. The API accepts configuration, but the ML training service
-            is not connected, so these controls do not execute model training.
+            Train local traffic models, aggregate their updates, and evaluate
+            the resulting global model.
           </p>
           <Link className="button-primary" to="/clients">
-            Review configured clients <Icon name="arrow" />
+            View local partitions <Icon name="arrow" />
           </Link>
         </div>
-
         <div className="training-hero-state">
           <span className="state-orbit" aria-hidden="true">
             <Icon name="training" />
           </span>
-          <span className={`status-pill ${configuredOnly ? "planned" : "offline"}`}>
+          <span className="status-pill planned">
             <span />
-            {configuredOnly ? "Configuration accepted" : "Model service unavailable"}
+            {status?.status ?? "Loading"}
           </span>
-          <small>{status?.data_source ?? "Waiting for backend status."}</small>
+          <small>{phaseLabels[status?.phase ?? ""] ?? "Federated run"}</small>
         </div>
       </section>
 
@@ -174,45 +194,48 @@ export default function FederatedLearning() {
             <span>Global model</span>
             <span className="summary-icon"><Icon name="training" /></span>
           </div>
-          <strong>—</strong>
-          <small>No trained model is connected</small>
+          <strong>{status?.model_trained ? status.global_model_version : "—"}</strong>
+          <small>{status?.model_trained ? "Trained in this run" : "Not trained"}</small>
         </article>
         <article className="summary-card">
           <div className="summary-card-heading">
             <span>Completed rounds</span>
             <span className="summary-icon"><Icon name="clock" /></span>
           </div>
-          <strong>{rounds?.rounds.length ?? "—"}</strong>
-          <small>Recorded by the backend</small>
+          <strong>{completedCount}</strong>
+          <small>{status ? `of ${status.total_rounds}` : "Loading"}</small>
         </article>
         <article className="summary-card">
           <div className="summary-card-heading">
-            <span>Configured clients</span>
+            <span>Local partitions</span>
             <span className="summary-icon"><Icon name="clients" /></span>
           </div>
-          <strong>{clients?.total_clients ?? "—"}</strong>
-          <small>Not connected to live clients</small>
+          <strong>{status?.participating_clients ?? "—"}</strong>
+          <small>Training participants</small>
         </article>
         <article className="summary-card">
           <div className="summary-card-heading">
-            <span>Model metrics</span>
+            <span>Evaluation MAE</span>
             <span className="summary-icon"><Icon name="predictions" /></span>
           </div>
-          <strong>—</strong>
-          <small>No model evaluation recorded</small>
+          <strong>{formatMetric(metrics?.mae)}</strong>
+          <small>
+            {metrics
+              ? `${metrics.evaluation_samples} holdout predictions`
+              : "Available after evaluation"}
+          </small>
         </article>
       </section>
 
       <section className="surface">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">FEDERATED CONTROLS</span>
-            <h2>Training configuration</h2>
-            <p>
-              Requests are sent to the backend. Until its ML service is wired,
-              starting only records a configuration.
-            </p>
+            <span className="eyebrow">TRAINING CONTROLS</span>
+            <h2>Run configuration</h2>
           </div>
+          <span className="count-pill">
+            {status?.execution_mode === "local_demo" ? "Local run" : "Federated run"}
+          </span>
         </div>
         <div className="training-controls-grid">
           <label className="select-control">
@@ -222,7 +245,10 @@ export default function FederatedLearning() {
               min="1"
               max="100"
               value={configuration.rounds}
-              onChange={(event) => updateConfiguration("rounds", Number(event.target.value))}
+              disabled={active}
+              onChange={(event) =>
+                updateConfiguration("rounds", Number(event.target.value))
+              }
             />
           </label>
           <label className="select-control">
@@ -232,7 +258,10 @@ export default function FederatedLearning() {
               min="1"
               max="50"
               value={configuration.local_epochs}
-              onChange={(event) => updateConfiguration("local_epochs", Number(event.target.value))}
+              disabled={active}
+              onChange={(event) =>
+                updateConfiguration("local_epochs", Number(event.target.value))
+              }
             />
           </label>
           <label className="select-control">
@@ -242,117 +271,170 @@ export default function FederatedLearning() {
               min="0.000001"
               step="0.0001"
               value={configuration.learning_rate}
-              onChange={(event) => updateConfiguration("learning_rate", Number(event.target.value))}
+              disabled={active}
+              onChange={(event) =>
+                updateConfiguration("learning_rate", Number(event.target.value))
+              }
             />
           </label>
           <label className="select-control">
-            Clients
+            Local partitions
             <input
               type="number"
               min="2"
               max="100"
               value={configuration.num_clients}
-              onChange={(event) => updateConfiguration("num_clients", Number(event.target.value))}
+              disabled={active}
+              onChange={(event) =>
+                updateConfiguration("num_clients", Number(event.target.value))
+              }
             />
           </label>
         </div>
+        {workLimitExceeded && (
+          <p className="inline-note" role="alert">
+            Reduce the run to 500 client-epochs or fewer.
+          </p>
+        )}
         <div className="training-control-actions">
           <button
             className="button-primary"
             type="button"
             onClick={() => void startTraining()}
-            disabled={busyAction !== null || isLoading}
+            disabled={active || busyAction !== null || isLoading || workLimitExceeded}
           >
-            {busyAction === "start" ? "Submitting…" : "Submit configuration"}
+            {busyAction === "start" ? "Starting…" : "Start training"}
           </button>
           <button
             className="button-secondary"
             type="button"
             onClick={() => void stopTraining()}
-            disabled={busyAction !== null || isLoading}
+            disabled={!active || busyAction !== null || isLoading}
           >
-            {busyAction === "stop" ? "Stopping…" : "Stop / clear"}
+            {busyAction === "stop" ? "Stopping…" : "Stop training"}
           </button>
-          {status && (
-            <span className="count-pill">Backend status: {status.status}</span>
-          )}
+          <span className="count-pill">
+            {status?.status === "TRAINING"
+              ? `Round ${status.current_round} of ${status.total_rounds}`
+              : `${completedCount} rounds complete`}
+          </span>
         </div>
-      </section>
-
-      <section className="surface">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">FEDERATED WORKFLOW</span>
-            <h2>How a training round works</h2>
-            <p>Four steps take local learning toward shared traffic intelligence.</p>
+        {status && (
+          <div className="training-progress-summary" aria-live="polite">
+            <div className="training-progress-heading">
+              <strong>{phaseLabels[status.phase] ?? status.phase}</strong>
+              <span>{Math.round(progress)}%</span>
+            </div>
+            <div
+              className="training-progress-track"
+              role="progressbar"
+              aria-valuenow={Math.round(progress)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Federated training progress"
+            >
+              <span style={{ width: `${progress}%` }} />
+            </div>
           </div>
-          <span className="count-pill">Workflow guide</span>
-        </div>
-        <div className="workflow-grid">
-          {stages.map((stage, index) => (
-            <article className="workflow-card" key={stage.number}>
-              <span className="workflow-step-number">{stage.number}</span>
-              {index < stages.length - 1 && (
-                <span className="workflow-connector" aria-hidden="true" />
-              )}
-              <h3>{stage.name}</h3>
-              <p>{stage.detail}</p>
-              <span className="status-pill planned"><span />{stage.state}</span>
-            </article>
-          ))}
-        </div>
+        )}
+      </section>
+
+      <section className="summary-grid training-summary-grid">
+        <article className="summary-card">
+          <div className="summary-card-heading"><span>RMSE</span></div>
+          <strong>{formatMetric(metrics?.rmse)}</strong>
+          <small>Holdout evaluation</small>
+        </article>
+        <article className="summary-card">
+          <div className="summary-card-heading"><span>R²</span></div>
+          <strong>{formatMetric(metrics?.r2)}</strong>
+          <small>Holdout evaluation</small>
+        </article>
+        <article className="summary-card">
+          <div className="summary-card-heading"><span>Training time</span></div>
+          <strong>
+            {status?.training_duration_seconds == null
+              ? "—"
+              : `${status.training_duration_seconds.toFixed(2)} s`}
+          </strong>
+          <small>Elapsed run time</small>
+        </article>
+        <article className="summary-card">
+          <div className="summary-card-heading"><span>Global model version</span></div>
+          <strong>{status?.global_model_version ?? "—"}</strong>
+          <small>{status?.metrics_source ? "Evaluated model" : "No evaluation yet"}</small>
+        </article>
       </section>
 
       <section className="surface">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">FEDERATED CLIENTS</span>
-            <h2>Configured contributors</h2>
-            <p>Backend client records use synthetic sample data; none are live connections.</p>
+            <span className="eyebrow">ROUND HISTORY</span>
+            <h2>Training results</h2>
+          </div>
+          <span className="count-pill">{completedCount} completed</span>
+        </div>
+        {!rounds || rounds.rounds.length === 0 ? (
+          <EmptyState message="Completed rounds will appear here." />
+        ) : (
+          <div className="comm-table-container">
+            <table className="comm-table">
+              <thead>
+                <tr>
+                  <th>Round</th>
+                  <th>Model</th>
+                  <th>Training loss</th>
+                  <th>MAE</th>
+                  <th>RMSE</th>
+                  <th>Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rounds.rounds.map((round) => (
+                  <tr key={round.round}>
+                    <td><strong>{round.round}</strong></td>
+                    <td>{round.global_model_version}</td>
+                    <td>{formatMetric(round.training_loss)}</td>
+                    <td>{formatMetric(round.metrics.mae)}</td>
+                    <td>{formatMetric(round.metrics.rmse)}</td>
+                    <td>{round.duration_seconds.toFixed(2)} s</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="surface">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">LOCAL PARTICIPANTS</span>
+            <h2>Training partitions</h2>
           </div>
           <span className="count-pill">{clients?.total_clients ?? 0} configured</span>
         </div>
-        {clients && clients.clients.length === 0 ? (
-          <EmptyState message="No federated clients are configured." />
+        {!clients || clients.clients.length === 0 ? (
+          <EmptyState message="No local partitions are configured." />
         ) : (
           <div className="training-client-list">
-            {clients?.clients.map((client) => (
+            {clients.clients.map((client) => (
               <div className="training-client-row" key={client.client_id}>
                 <span className="road-marker moderate" />
                 <div>
                   <strong>{client.name}</strong>
-                  <small>{client.client_id} · {client.data_source}</small>
+                  <small>
+                    {client.client_id} · {client.training_samples} training windows
+                  </small>
                 </div>
-                <span className="status-pill planned"><span />{client.status}</span>
+                <span className="status-pill planned">
+                  <span />
+                  {client.status}
+                </span>
               </div>
             ))}
           </div>
         )}
-        <p className="inline-note">{sampleDataNote} Client updates and aggregation have not run.</p>
-      </section>
-
-      <section className="surface">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">PRIVACY & COMMUNICATION</span>
-            <h2>Why federated learning?</h2>
-            <p>How distributed learning can support traffic intelligence.</p>
-          </div>
-        </div>
-        <div className="info-grid">
-          <div className="info-card">
-            <h3>Data Privacy</h3>
-            <p>Raw traffic data can remain at each participating client while model updates are shared.</p>
-          </div>
-          <div className="info-card">
-            <h3>Collaborative Learning</h3>
-            <p>Multiple locations can contribute to a shared model that learns from distributed traffic patterns.</p>
-          </div>
-          <div className="info-card">
-            <h3>Communication Efficiency</h3>
-            <p>Model updates can be exchanged instead of transferring complete local datasets.</p>
-          </div>
-        </div>
       </section>
     </div>
   );

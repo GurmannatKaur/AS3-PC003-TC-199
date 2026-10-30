@@ -61,14 +61,10 @@ export default function CommunicationCost() {
         <div className="page-intro-copy">
           <span className="eyebrow">NETWORK EFFICIENCY</span>
           <h1>Communication Cost</h1>
-          <p className="page-subtitle">
-            Upload and download totals come from backend communication records.
-            No transfer estimates are shown as measured activity.
-          </p>
         </div>
         <div className="status-pill planned">
           <span />
-          Backend records
+          Payload sizes
         </div>
       </header>
 
@@ -89,7 +85,7 @@ export default function CommunicationCost() {
                 <span className="summary-icon"><Icon name="network" /></span>
               </div>
               <strong>{formatBytes(summary.total_upload_bytes)}</strong>
-              <small>Recorded client-to-server bytes</small>
+              <small>Serialized client updates</small>
             </article>
             <article className="summary-card">
               <div className="summary-card-heading">
@@ -97,7 +93,7 @@ export default function CommunicationCost() {
                 <span className="summary-icon"><Icon name="network" /></span>
               </div>
               <strong>{formatBytes(summary.total_download_bytes)}</strong>
-              <small>Recorded server-to-client bytes</small>
+              <small>Serialized global-model copies</small>
             </article>
             <article className="summary-card">
               <div className="summary-card-heading">
@@ -113,16 +109,15 @@ export default function CommunicationCost() {
                 <span className="summary-icon"><Icon name="training" /></span>
               </div>
               <strong>{summary.total_rounds.toString().padStart(2, "0")}</strong>
-              <small>{summary.data_source}</small>
+              <small>Completed training rounds</small>
             </article>
           </section>
 
           <section className="surface">
             <div className="section-heading">
               <div>
-                <span className="eyebrow">MEASURED TRANSFERS</span>
-                <h2>Round communication details</h2>
-                <p>Byte counts recorded by the backend per federated round.</p>
+                <span className="eyebrow">ROUND PAYLOADS</span>
+                <h2>Serialized model sizes</h2>
               </div>
               <span className="count-pill">{rounds?.total_rounds ?? 0} rounds</span>
             </div>
@@ -166,19 +161,17 @@ export default function CommunicationCost() {
               <div>
                 <span className="eyebrow">MEASUREMENT METHOD</span>
                 <h2>Communication cost</h2>
-                <p>Totals reflect serialized payload sizes recorded for each round.</p>
+                <p>Payload sizes are measured from each serialized model state.</p>
               </div>
             </div>
             <div className="comm-formula-box">
               <div className="comm-formula-equation">
                 <span className="comm-formula-plain">
-                  Total bytes = recorded upload bytes + recorded download bytes
+                  Total bytes = client update payloads + global model payloads
                 </span>
               </div>
               <p className="comm-formula-detail">
-                The API currently exposes round totals, not per-client
-                breakdowns. No estimated savings or client-level transfers are
-                inferred from these records.
+                Serialized sizes only; no network transfer took place.
               </p>
             </div>
           </section>
