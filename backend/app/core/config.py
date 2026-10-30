@@ -1,8 +1,8 @@
-from pathlib import Path
+from pydantic import field_validator
 import logging
 import sys
+from pathlib import Path
 
-from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -103,7 +103,7 @@ settings = Settings()
 
 def setup_logging() -> None:
     logging.basicConfig(
-        level=logging.INFO,
+        level=getattr(logging, settings.log_level.upper(), logging.INFO),
         format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
         handlers=[
             logging.StreamHandler(sys.stdout),

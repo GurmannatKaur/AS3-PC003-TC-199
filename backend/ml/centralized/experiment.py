@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 
 from app.core.config import settings
-from app.ml.centralized.evaluator import evaluate_model
+from ml.centralized.evaluator import evaluate_model
 
 
 def save_experiment_results(
