@@ -1,6 +1,6 @@
 from app.core.config import settings
-from app.ml.federated.server import FederatedServer
-from app.ml.federated.trainer_lifecycle import FederatedTrainingLifecycle
+from ml.federated.server import FederatedServer
+from ml.federated.trainer_lifecycle import FederatedTrainingLifecycle
 
 
 def create_federated_trainer(

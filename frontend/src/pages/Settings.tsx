@@ -51,7 +51,7 @@ export default function Settings() {
           </div>
           <div className="setting-row">
             <div><strong>Default prediction window</strong><small>This preference applies to the current session.</small></div>
-            <select className="settings-select" value={defaultHorizon} onChange={(event) => setDefaultHorizon(event.target.value === "60" ? 60 : event.target.value === "30" ? 30 : 15)} aria-label="Default prediction window"><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">60 minutes</option></select>
+            <select className="settings-select" value={defaultHorizon} onChange={(event) => setDefaultHorizon(event.target.value === "5" ? 5 : event.target.value === "10" ? 10 : 15)} aria-label="Default prediction window"><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option></select>
           </div>
         </section>
 

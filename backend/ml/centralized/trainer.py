@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from app.core.config import settings
-from app.ml.models.traffic_model import TrafficFlowModel
+from ml.models.traffic_model import TrafficFlowModel
 
 
 def train_centralized_model(

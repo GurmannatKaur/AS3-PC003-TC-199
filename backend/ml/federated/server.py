@@ -2,7 +2,7 @@ from collections.abc import Mapping
 
 import torch
 
-from app.ml.federated.fedavg import fedavg
+from ml.federated.fedavg import fedavg
 
 
 class FederatedServer:

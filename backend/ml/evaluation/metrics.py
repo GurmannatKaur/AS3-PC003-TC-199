@@ -40,4 +40,8 @@ def calculate_metrics(
         "MSE": float(mse),
         "RMSE": rmse,
         "R2": float(r2),
+        "mae": float(mae),
+        "mse": float(mse),
+        "rmse": rmse,
+        "r2": float(r2),
     }

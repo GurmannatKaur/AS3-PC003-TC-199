@@ -19,16 +19,26 @@ npm run build
 ## Application
 
 The shared navigation provides Overview, Traffic Network, Federated Clients,
-Federated Training, Predictions, and Settings. The dashboard currently uses
-in-app page state rather than URL routing.
+Federated Training, Predictions, and Settings.
 
-Traffic values and forecast series are demonstration data, and the map markers
-are approximate. Live traffic, client connections, model training, aggregation,
-and prediction services are not connected. Display preferences are held for the
-current session.
+The frontend uses React 18, TypeScript, Vite, React Router, and React Leaflet.
+Run `npm run dev` from this folder (Vite's default development origin is
+`http://localhost:5173`). Run `npm run build` for the TypeScript check and
+production bundle.
 
-The API modules remain available for future backend integration. Set
-`VITE_API_BASE_URL` in `.env` when a backend URL is available.
+Copy `.env.example` to `.env` to set `VITE_API_BASE_URL`; the default backend
+address is `http://127.0.0.1:8000/api`. The API modules unwrap the backend's
+`{ success, message, data }` response envelope. Dashboard, traffic-map,
+prediction, client, federated status/configuration, and communication-cost
+pages call their corresponding FastAPI endpoints. The current map and client
+records are backend sample data. The prediction page uses the trained federated
+weights only when both the model and scaler artifacts exist; otherwise it
+explicitly labels the backend's sample calculation.
+
+Federated start/stop controls send the backend's documented request fields.
+The current FastAPI start route only accepts configuration; it does not run
+training. The UI identifies this limitation rather than presenting the API's
+sample state as completed model training.
 
 Emergency Response Routing requests road directions from the public OSRM
 service using OpenStreetMap road data. To use a self-hosted OSRM instance, set

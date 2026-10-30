@@ -2,6 +2,32 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 
+class TrainingLifecycle:
+    """Validate state transitions for a federated training run."""
+
+    _TRANSITIONS = {
+        "IDLE": {"INITIALIZING"},
+        "INITIALIZING": {"LOCAL_TRAINING", "FAILED", "STOPPED"},
+        "LOCAL_TRAINING": {"AGGREGATING", "FAILED", "STOPPED"},
+        "AGGREGATING": {"EVALUATING", "COMPLETED", "FAILED", "STOPPED"},
+        "EVALUATING": {"COMPLETED", "FAILED", "STOPPED"},
+        "COMPLETED": set(),
+        "FAILED": set(),
+        "STOPPED": set(),
+    }
+
+    def __init__(self) -> None:
+        self.status = "IDLE"
+
+    def transition(self, status: str) -> None:
+        if status not in self._TRANSITIONS.get(self.status, set()):
+            raise ValueError(
+                f"Invalid training lifecycle transition: "
+                f"{self.status} -> {status}."
+            )
+        self.status = status
+
+
 @dataclass
 class FederatedRound:
     round_number: int

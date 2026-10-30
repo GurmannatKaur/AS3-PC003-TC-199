@@ -47,7 +47,7 @@ def get_emergency_route(request: EmergencyRouteRequest):
 
     if route_data is None:
         raise HTTPException(
-            status_code=404,
+            status_code=422,
             detail="No sample route is available for this origin and destination.",
         )
 
@@ -55,7 +55,7 @@ def get_emergency_route(request: EmergencyRouteRequest):
         "origin": origin,
         "destination": destination,
         **route_data,
-        "data_source": "Synthetic sample route",
+        "data_source": "sample",
         "is_live": False,
         "emergency_service_connected": False,
         "notice": (

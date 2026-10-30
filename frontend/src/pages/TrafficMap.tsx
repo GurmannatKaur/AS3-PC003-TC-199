@@ -1,9 +1,13 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ChandigarhMap from "../components/ChandigarhMap";
 import EmergencyRouteRouting from "../components/EmergencyRouteRouting";
 import type { MapPickMode } from "../components/EmergencyRouteRouting";
 import Icon from "../components/common/Icon";
+import EmptyState from "../components/common/EmptyState";
+import ErrorState from "../components/common/ErrorState";
+import LoadingState from "../components/common/LoadingState";
+import { getTrafficMap } from "../api/dashboardApi";
 import { findEmergencyRoutes, RoutingError } from "../api/routingApi";
 import type {
   Coordinates,
@@ -12,15 +16,44 @@ import type {
   RoutePreference,
   RoutingLocation,
 } from "../api/routingApi";
-import { roads } from "../data/trafficSamples";
 import { formatSpeed, usePreferences } from "../data/preferences";
+import type { TrafficMapNode } from "../types/dashboard";
 
 export default function TrafficMap() {
   const { speedUnit } = usePreferences();
-  const [selectedRoadId, setSelectedRoadId] = useState(roads[0].id);
+  const [trafficNodes, setTrafficNodes] = useState<TrafficMapNode[]>([]);
+  const [selectedRoadId, setSelectedRoadId] = useState<string>();
+  const [mapLoading, setMapLoading] = useState(true);
+  const [mapError, setMapError] = useState("");
 
-  const selectedRoad =
-    roads.find((road) => road.id === selectedRoadId) ?? roads[0];
+  const loadTrafficMap = useCallback(async (signal?: AbortSignal) => {
+    setMapLoading(true);
+    setMapError("");
+    try {
+      const response = await getTrafficMap({ signal });
+      setTrafficNodes(response.nodes);
+      setSelectedRoadId((current) =>
+        response.nodes.some((node) => node.id === current)
+          ? current
+          : response.nodes[0]?.id,
+      );
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setMapError(
+        error instanceof Error ? error.message : "Traffic map data could not be loaded.",
+      );
+    } finally {
+      if (!signal?.aborted) setMapLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadTrafficMap(controller.signal);
+    return () => controller.abort();
+  }, [loadTrafficMap]);
+
+  const selectedRoad = trafficNodes.find((node) => node.id === selectedRoadId);
 
   const [routePlan, setRoutePlan] = useState<RoutePlan | null>(null);
   const [origin, setOrigin] = useState<RoutingLocation | null>(null);
@@ -137,9 +170,18 @@ export default function TrafficMap() {
           onSelectRoad={setSelectedRoadId}
           className="network-page-map"
           routePlan={routePlan}
+          trafficNodes={trafficNodes}
           mapPickMode={mapPickMode}
           onMapLocationPicked={pickMapLocation}
         />
+
+        {mapLoading && <LoadingState message="Loading traffic locations…" />}
+        {mapError && (
+          <ErrorState message={mapError} onRetry={() => void loadTrafficMap()} />
+        )}
+        {!mapLoading && !mapError && trafficNodes.length === 0 && (
+          <EmptyState message="The traffic map has no locations to display." />
+        )}
 
         <div className="network-title-float">
           <span className="network-title-icon">
@@ -147,7 +189,7 @@ export default function TrafficMap() {
           </span>
           <div>
             <strong>Chandigarh, India</strong>
-            <small>Explore key traffic corridors</small>
+            <small>Backend traffic locations · sample data</small>
           </div>
         </div>
 
@@ -157,48 +199,50 @@ export default function TrafficMap() {
         >
           <span className="eyebrow">YOUR CORRIDORS</span>
 
-          {roads.map((road) => (
+          {trafficNodes.map((road) => (
             <button
               className={`network-road-chip ${
-                selectedRoad.id === road.id ? "active" : ""
+                selectedRoad?.id === road.id ? "active" : ""
               }`}
               key={road.id}
               onClick={() => setSelectedRoadId(road.id)}
-              aria-pressed={selectedRoad.id === road.id}
+              aria-pressed={selectedRoad?.id === road.id}
               type="button"
             >
               <span
-                className={`traffic-dot ${road.congestion.toLowerCase()}`}
+                className={`traffic-dot ${road.traffic_level.toLowerCase()}`}
               />
               <span>
                 <strong>{road.name}</strong>
-                <small>{road.junction}</small>
+                <small>Sample status: {road.client_status}</small>
               </span>
               <span
-                className={`traffic-level ${road.congestion.toLowerCase()}`}
+                className={`traffic-level ${road.traffic_level.toLowerCase()}`}
               >
-                {road.congestion}
+                {road.traffic_level}
               </span>
             </button>
           ))}
         </aside>
 
-        <div className="network-bottom-float">
-          <span
-            className={`traffic-dot ${selectedRoad.congestion.toLowerCase()}`}
-          />
-          <span>
-            <strong>{selectedRoad.name}</strong>
-            <small>
-              {selectedRoad.congestion} traffic ·{" "}
-              {formatSpeed(selectedRoad.averageSpeed, speedUnit)} ·{" "}
-              {selectedRoad.flow.toLocaleString()} veh/h · illustrative
-            </small>
-          </span>
-        </div>
+        {selectedRoad && (
+          <div className="network-bottom-float">
+            <span
+              className={`traffic-dot ${selectedRoad.traffic_level.toLowerCase()}`}
+            />
+            <span>
+              <strong>{selectedRoad.name}</strong>
+              <small>
+                {selectedRoad.traffic_level} traffic ·{" "}
+                {formatSpeed(selectedRoad.average_speed, speedUnit)} ·{" "}
+                {selectedRoad.vehicle_count.toLocaleString()} vehicles · sample
+              </small>
+            </span>
+          </div>
+        )}
 
         <span className="map-location-note">
-          Approximate corridor markers · illustrative locations
+          Backend-provided approximate locations · sample data, not live
         </span>
       </section>
 
@@ -208,43 +252,47 @@ export default function TrafficMap() {
             <span className="eyebrow">NETWORK OVERVIEW</span>
             <h2>Traffic corridors</h2>
             <p>
-              Explore the illustrative traffic information associated with each
-              configured road.
+              Traffic locations returned by the backend. Values are sample data,
+              not live sensor measurements.
             </p>
           </div>
-          <span className="count-pill">{roads.length} configured roads</span>
+          <span className="count-pill">{trafficNodes.length} locations</span>
         </div>
 
-        <div className="overview-road-grid">
-          {roads.map((road) => (
-            <button
-              className={`overview-road-card road-${road.id} ${
-                selectedRoad.id === road.id ? "selected" : ""
-              }`}
-              key={road.id}
-              onClick={() => setSelectedRoadId(road.id)}
-              aria-pressed={selectedRoad.id === road.id}
-              type="button"
-            >
-              <span className="road-card-top">
-                <span
-                  className={`road-marker ${road.congestion.toLowerCase()}`}
-                />
-                <span
-                  className={`traffic-level ${road.congestion.toLowerCase()}`}
-                >
-                  {road.congestion}
+        {mapLoading ? (
+          <LoadingState message="Loading traffic locations…" />
+        ) : mapError ? (
+          <ErrorState message={mapError} onRetry={() => void loadTrafficMap()} />
+        ) : trafficNodes.length === 0 ? (
+          <EmptyState message="No traffic locations are available." />
+        ) : (
+          <div className="overview-road-grid">
+            {trafficNodes.map((node) => (
+              <button
+                className={`overview-road-card road-${node.id} ${
+                  selectedRoad?.id === node.id ? "selected" : ""
+                }`}
+                key={node.id}
+                onClick={() => setSelectedRoadId(node.id)}
+                aria-pressed={selectedRoad?.id === node.id}
+                type="button"
+              >
+                <span className="road-card-top">
+                  <span className={`road-marker ${node.traffic_level.toLowerCase()}`} />
+                  <span className={`traffic-level ${node.traffic_level.toLowerCase()}`}>
+                    {node.traffic_level}
+                  </span>
                 </span>
-              </span>
-              <strong>{road.name}</strong>
-              <small>{road.junction}</small>
-              <span className="road-card-foot">
-                <span>{formatSpeed(road.averageSpeed, speedUnit)}</span>
-                <span>{road.flow.toLocaleString()} veh/h</span>
-              </span>
-            </button>
-          ))}
-        </div>
+                <strong>{node.name}</strong>
+                <small>{node.client_status} client</small>
+                <span className="road-card-foot">
+                  <span>{formatSpeed(node.average_speed, speedUnit)}</span>
+                  <span>{node.vehicle_count.toLocaleString()} vehicles</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       <EmergencyRouteRouting

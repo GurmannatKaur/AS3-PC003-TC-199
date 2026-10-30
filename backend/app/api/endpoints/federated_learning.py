@@ -1,10 +1,10 @@
 from fastapi import APIRouter
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 router = APIRouter()
 
 training_state = {
-    "status": "Idle",
+    "status": "IDLE",
     "current_round": 0,
     "total_rounds": 5,
     "participating_clients": 4,
@@ -13,6 +13,8 @@ training_state = {
 
 
 class FederatedTrainingRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     rounds: int = Field(default=5, ge=1, le=100)
     local_epochs: int = Field(default=3, ge=1, le=50)
     learning_rate: float = Field(default=0.001, gt=0)
@@ -23,19 +25,23 @@ class FederatedTrainingRequest(BaseModel):
 def get_federated_status():
     return {
         **training_state,
-        "data_source": "Training has not been executed",
+        "data_source": (
+            "Training service is not connected"
+            if training_state["status"] == "CONFIGURED"
+            else "Training has not been executed"
+        ),
     }
 
 
 @router.post("/start")
 def start_federated_training(request: FederatedTrainingRequest):
-    if training_state["status"] == "Training":
+    if training_state["status"] == "TRAINING":
         return {
             "message": "Federated training is already running",
             "status": training_state["status"],
         }
 
-    training_state["status"] = "Training"
+    training_state["status"] = "CONFIGURED"
     training_state["current_round"] = 0
     training_state["total_rounds"] = request.rounds
     training_state["participating_clients"] = request.num_clients
@@ -45,16 +51,24 @@ def start_federated_training(request: FederatedTrainingRequest):
         "message": "Federated training configuration accepted",
         "status": training_state["status"],
         "configuration": request.model_dump(),
-        "note": "Actual model training will be connected through the ML training service.",
+        "note": (
+            "Configuration accepted only. The ML training service is not "
+            "connected, so no model training has run."
+        ),
     }
 
 
 @router.post("/stop")
 def stop_federated_training():
-    training_state["status"] = "Stopped"
+    was_running = training_state["status"] == "TRAINING"
+    training_state["status"] = "STOPPED" if was_running else "IDLE"
 
     return {
-        "message": "Federated training stopped",
+        "message": (
+            "Federated training stopped"
+            if was_running
+            else "No active training process was connected to stop."
+        ),
         "status": training_state["status"],
     }
 
@@ -73,7 +87,7 @@ def get_federated_clients():
         {
             "client_id": f"client_{index:02d}",
             "name": f"Traffic Client {index}",
-            "status": "Online",
+            "status": "offline",
             "data_source": "Synthetic sample data",
         }
         for index in range(1, training_state["participating_clients"] + 1)

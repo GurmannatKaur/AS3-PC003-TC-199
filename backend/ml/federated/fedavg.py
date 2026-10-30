@@ -1,4 +1,6 @@
-﻿import torch
+from numbers import Integral
+
+import torch
 
 from ml.federated.aggregation import aggregate_model_weights
 
@@ -28,7 +30,12 @@ def fedavg(
             raise ValueError("Client update is missing num_samples.")
 
         client_weights.append(update["model_weights"])
-        client_samples.append(int(update["num_samples"]))
+        samples = update["num_samples"]
+        if isinstance(samples, bool) or not isinstance(samples, Integral):
+            raise ValueError(
+                "Client sample counts must be non-negative integers."
+            )
+        client_samples.append(samples)
 
     return aggregate_model_weights(
         client_weights=client_weights,

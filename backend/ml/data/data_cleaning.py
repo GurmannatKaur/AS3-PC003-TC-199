@@ -13,6 +13,18 @@ def clean_traffic_data(data: pd.DataFrame) -> pd.DataFrame:
 
     data = data.copy()
 
+    if "timestamp" in data.columns:
+        data["timestamp"] = pd.to_datetime(
+            data["timestamp"],
+            errors="coerce",
+            utc=True,
+        )
+        data = data.dropna(subset=["timestamp"])
+
+    for column in ("traffic_flow", "vehicle_count", "average_speed"):
+        if column in data.columns:
+            data[column] = pd.to_numeric(data[column], errors="coerce")
+
     # Remove duplicate rows
     data = data.drop_duplicates()
 
@@ -28,6 +40,10 @@ def clean_traffic_data(data: pd.DataFrame) -> pd.DataFrame:
         data[column] = data[column].fillna(
             data[column].median()
         )
+
+    for column in ("traffic_flow", "vehicle_count", "average_speed"):
+        if column in data.columns:
+            data = data[data[column] >= 0]
 
     # Handle missing non-numeric values
     non_numeric_columns = data.select_dtypes(

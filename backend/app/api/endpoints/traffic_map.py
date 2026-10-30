@@ -50,22 +50,31 @@ SAMPLE_TRAFFIC_NODES = [
 @router.get("/map")
 def get_traffic_map(
     traffic_level: str | None = Query(default=None),
+    status: str | None = Query(default=None),
     include_offline: bool = Query(default=True),
 ):
-    nodes = SAMPLE_TRAFFIC_NODES.copy()
+    nodes = [
+        {
+            **node,
+            "status": node["traffic_level"].lower(),
+            "online": node["client_status"] == "Online",
+        }
+        for node in SAMPLE_TRAFFIC_NODES
+    ]
 
-    if traffic_level:
+    selected_level = traffic_level or status
+    if selected_level:
         nodes = [
             node
             for node in nodes
-            if node["traffic_level"].lower() == traffic_level.lower()
+            if node["traffic_level"].lower() == selected_level.lower()
         ]
 
     if not include_offline:
         nodes = [
             node
             for node in nodes
-            if node["client_status"] == "Online"
+            if node["online"]
         ]
 
     return {

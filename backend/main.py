@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import json
 import logging
 from pathlib import Path
 
@@ -14,7 +15,7 @@ from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.logging_config import configure_logging
 import app.models  # Register SQLAlchemy models before creating tables.
-from app.utils.response_helpers import error_response
+from app.utils.response_helpers import error_response, success_response
 
 configure_logging()
 logger = logging.getLogger(__name__)
@@ -81,4 +82,42 @@ async def unhandled_exception_handler(_: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content=error_response("Internal server error"),
+    )
+
+
+@app.middleware("http")
+async def success_envelope_middleware(request: Request, call_next):
+    response = await call_next(request)
+    if (
+        not request.url.path.startswith("/api/")
+        or response.status_code >= 400
+        or "application/json" not in response.headers.get("content-type", "")
+    ):
+        return response
+
+    body = b"".join([chunk async for chunk in response.body_iterator])
+    if not body:
+        return response
+
+    try:
+        data = json.loads(body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JSONResponse(
+            content={"detail": "Invalid JSON response from API handler."},
+            status_code=500,
+        )
+
+    if not (isinstance(data, dict) and {"success", "data"}.issubset(data)):
+        data = success_response(data)
+
+    headers = {
+        key: value
+        for key, value in response.headers.items()
+        if key.lower() not in {"content-length", "content-type"}
+    }
+    return JSONResponse(
+        content=data,
+        status_code=response.status_code,
+        headers=headers,
+        background=response.background,
     )

@@ -1,9 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 from app.core.config import settings
-from app.ml.federated.client import train_client
-from app.ml.federated.server import FederatedServer
+from ml.federated.client import train_client
+from ml.federated.round_manager import TrainingLifecycle
+from ml.federated.server import FederatedServer
 
 
 @dataclass
@@ -14,6 +15,7 @@ class FederatedTrainingLifecycle:
     status: str = "idle"
     started_at: datetime | None = None
     completed_at: datetime | None = None
+    round_lifecycle: TrainingLifecycle = field(default_factory=TrainingLifecycle)
 
     def start(self, total_rounds: int | None = None) -> None:
         if self.status == "running":
@@ -24,6 +26,8 @@ class FederatedTrainingLifecycle:
         self.status = "running"
         self.started_at = datetime.utcnow()
         self.completed_at = None
+        self.round_lifecycle = TrainingLifecycle()
+        self.round_lifecycle.transition("INITIALIZING")
 
     def run_round(
         self,
@@ -36,26 +40,42 @@ class FederatedTrainingLifecycle:
         if not client_datasets:
             raise ValueError("No client datasets were provided.")
 
-        global_weights = self.server.get_global_weights()
-        client_updates = []
+        try:
+            self.round_lifecycle.transition("LOCAL_TRAINING")
+            global_weights = self.server.get_global_weights()
+            client_updates = []
 
-        for dataset in client_datasets:
-            update = train_client(
-                client_id=dataset["client_id"],
-                X_train=dataset["X_train"],
-                y_train=dataset["y_train"],
-                input_size=input_size,
-                global_weights=global_weights,
-            )
+            for dataset in client_datasets:
+                update = train_client(
+                    client_id=dataset["client_id"],
+                    X_train=dataset["X_train"],
+                    y_train=dataset["y_train"],
+                    input_size=input_size,
+                    global_weights=global_weights,
+                )
+                client_updates.append(update)
 
-            client_updates.append(update)
+            self.round_lifecycle.transition("AGGREGATING")
+            self.server.aggregate_updates(client_updates)
+            self.round_lifecycle.transition("COMPLETED")
+            self.current_round += 1
 
-        self.server.aggregate_updates(client_updates)
-        self.current_round += 1
-
-        if self.current_round >= self.total_rounds:
-            self.status = "completed"
+            if self.current_round >= self.total_rounds:
+                self.status = "completed"
+                self.completed_at = datetime.utcnow()
+            else:
+                self.round_lifecycle = TrainingLifecycle()
+                self.round_lifecycle.transition("INITIALIZING")
+        except Exception:
+            if self.round_lifecycle.status not in {
+                "COMPLETED",
+                "FAILED",
+                "STOPPED",
+            }:
+                self.round_lifecycle.transition("FAILED")
+            self.status = "failed"
             self.completed_at = datetime.utcnow()
+            raise
 
         return {
             "round_number": self.current_round,
@@ -75,6 +95,12 @@ class FederatedTrainingLifecycle:
     def stop(self) -> dict:
         self.status = "stopped"
         self.completed_at = datetime.utcnow()
+        if self.round_lifecycle.status not in {
+            "COMPLETED",
+            "FAILED",
+            "STOPPED",
+        }:
+            self.round_lifecycle.transition("STOPPED")
 
         return {
             "status": self.status,

@@ -3,6 +3,44 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
+from ml.data.preprocessing import MODEL_FEATURES
+
+
+class TrafficWindowDataset(Dataset):
+    """Windowed traffic observations for the model's five input features."""
+
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        window_size: int = 12,
+    ) -> None:
+        if window_size < 1:
+            raise ValueError("window_size must be positive.")
+        missing = set(MODEL_FEATURES) - set(data.columns)
+        if missing:
+            raise ValueError(
+                f"Traffic data is missing model features: {', '.join(sorted(missing))}."
+            )
+        if "traffic_flow" not in data.columns:
+            raise ValueError("Traffic data must include a traffic_flow target.")
+
+        self.features = torch.as_tensor(
+            data[MODEL_FEATURES].to_numpy(dtype=np.float32)
+        )
+        self.targets = torch.as_tensor(
+            data["traffic_flow"].to_numpy(dtype=np.float32)
+        )
+        self.window_size = window_size
+
+    def __len__(self) -> int:
+        return max(0, len(self.features) - self.window_size)
+
+    def __getitem__(self, index: int) -> tuple[torch.Tensor, torch.Tensor]:
+        if index < 0 or index >= len(self):
+            raise IndexError(index)
+        end = index + self.window_size
+        return self.features[index:end], self.targets[end].unsqueeze(0)
+
 
 class TrafficDataset(Dataset):
     """

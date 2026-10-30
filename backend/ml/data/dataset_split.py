@@ -1,6 +1,33 @@
 from typing import Tuple
 
 import numpy as np
+import pandas as pd
+
+
+def temporal_split(
+    data: pd.DataFrame,
+    train_ratio: float = 0.70,
+    validation_ratio: float = 0.15,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Split a traffic frame chronologically into train, validation, and test."""
+    if data.empty:
+        raise ValueError("Cannot split an empty dataset.")
+    if not 0 < train_ratio < 1 or not 0 < validation_ratio < 1:
+        raise ValueError("Split ratios must be between zero and one.")
+    if train_ratio + validation_ratio >= 1:
+        raise ValueError("Training and validation ratios must sum to less than 1.")
+
+    ordered = data.sort_values("timestamp") if "timestamp" in data else data
+    train_end = int(len(ordered) * train_ratio)
+    validation_end = int(len(ordered) * (train_ratio + validation_ratio))
+    if train_end == 0 or validation_end <= train_end or validation_end >= len(ordered):
+        raise ValueError("Not enough rows for the requested temporal split.")
+
+    return (
+        ordered.iloc[:train_end].copy(),
+        ordered.iloc[train_end:validation_end].copy(),
+        ordered.iloc[validation_end:].copy(),
+    )
 
 
 def split_dataset(

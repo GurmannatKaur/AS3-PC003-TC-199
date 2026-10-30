@@ -1,22 +1,14 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
+from app.services.congestion_service import classify_congestion
+
 router = APIRouter()
 
 
 class CongestionRequest(BaseModel):
-    vehicle_count: float = Field(ge=0)
-    average_speed: float = Field(ge=0)
-
-
-def classify_congestion(vehicle_count: float, average_speed: float) -> str:
-    if average_speed < 20 or vehicle_count >= 800:
-        return "High"
-
-    if average_speed < 40 or vehicle_count >= 400:
-        return "Moderate"
-
-    return "Low"
+    vehicle_count: float = Field(ge=0, allow_inf_nan=False)
+    average_speed: float = Field(ge=0, allow_inf_nan=False)
 
 
 @router.get("/congestion")
@@ -35,8 +27,8 @@ def get_congestion():
 @router.post("/congestion/classify")
 def classify_traffic(request: CongestionRequest):
     level = classify_congestion(
-        request.vehicle_count,
-        request.average_speed,
+        traffic_flow=request.vehicle_count,
+        average_speed=request.average_speed,
     )
 
     return {

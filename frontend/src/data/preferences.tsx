@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 export type SpeedUnit = "km/h" | "mph";
-export type ForecastHorizon = 15 | 30 | 60;
+export type ForecastHorizon = 5 | 10 | 15;
 
 type Preferences = {
   speedUnit: SpeedUnit;

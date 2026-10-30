@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 
 import AppLayout from "./components/layout/AppLayout";
@@ -14,17 +13,13 @@ import Clients from "./pages/clients";
 import Settings from "./pages/Settings";
 
 import { PreferencesProvider } from "./data/preferences";
-import { roads } from "./data/trafficSamples";
 
 function ClientsRoute() {
   const navigate = useNavigate();
-  const [selectedRoadId, setSelectedRoadId] = useState(roads[0].id);
 
   return (
     <Clients
       onNavigate={() => navigate("/traffic-map")}
-      selectedRoadId={selectedRoadId}
-      onSelectRoad={setSelectedRoadId}
     />
   );
 }

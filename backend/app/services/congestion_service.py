@@ -1,3 +1,4 @@
+from math import isfinite
 from typing import Optional
 
 
@@ -8,25 +9,27 @@ def classify_congestion(
     """
     Classify congestion using traffic flow and average speed.
 
-    These are configurable sample thresholds, not live traffic data.
+    These illustrative thresholds are shared by API and prediction paths.
     """
 
+    if not isfinite(traffic_flow):
+        raise ValueError("Traffic flow must be finite.")
     if traffic_flow < 0:
         raise ValueError("Traffic flow cannot be negative.")
 
-    if average_speed is not None and average_speed < 0:
-        raise ValueError("Average speed cannot be negative.")
-
     if average_speed is not None:
-        if average_speed < 15:
-            return "High"
-        if average_speed < 30:
-            return "Moderate"
-        return "Low"
+        if not isfinite(average_speed):
+            raise ValueError("Average speed must be finite.")
+        if average_speed < 0:
+            raise ValueError("Average speed cannot be negative.")
 
-    if traffic_flow >= 700:
+    if traffic_flow >= 800 or (
+        average_speed is not None and average_speed < 20
+    ):
         return "High"
-    if traffic_flow >= 400:
+    if traffic_flow >= 400 or (
+        average_speed is not None and average_speed < 40
+    ):
         return "Moderate"
 
     return "Low"

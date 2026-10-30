@@ -1,11 +1,17 @@
 
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/dashboard.css";
 import ChandigarhMap from "../components/ChandigarhMap";
+import EmptyState from "../components/common/EmptyState";
+import ErrorState from "../components/common/ErrorState";
+import LoadingState from "../components/common/LoadingState";
+import { getDashboard, getTrafficMap } from "../api/dashboardApi";
 import { roads } from "../data/trafficSamples";
 import { formatSpeed, usePreferences } from "../data/preferences";
 import Icon from "../components/common/Icon";
 import DecorativeCarAnimation from "../components/dashboard/DecorativeCarAnimation";
+import type { DashboardResponse, TrafficMapResponse } from "../types/dashboard";
 
 const trend = [38, 48, 44, 61, 58, 72, 64, 82, 77, 91, 83, 96];
 
@@ -39,6 +45,37 @@ const workflow = [
 export default function Overview() {
   const { speedUnit } = usePreferences();
   const selectedRoad = roads[0];
+  const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
+  const [trafficMap, setTrafficMap] = useState<TrafficMapResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [reloadCounter, setReloadCounter] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadDashboard = async () => {
+      setIsLoading(true);
+      setErrorMessage("");
+      try {
+        const [dashboardResponse, mapResponse] = await Promise.all([
+          getDashboard(controller.signal),
+          getTrafficMap({ signal: controller.signal }),
+        ]);
+        setDashboard(dashboardResponse);
+        setTrafficMap(mapResponse);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setErrorMessage(
+          error instanceof Error ? error.message : "Dashboard data could not be loaded.",
+        );
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    };
+
+    void loadDashboard();
+    return () => controller.abort();
+  }, [reloadCounter]);
 
   return (
     <div className="page-stack page-overview">
@@ -51,26 +88,37 @@ export default function Overview() {
 
       <DecorativeCarAnimation />
 
+      {isLoading && <LoadingState message="Loading dashboard data…" />}
+      {errorMessage && (
+        <ErrorState
+          message={errorMessage}
+          onRetry={() => setReloadCounter((current) => current + 1)}
+        />
+      )}
+
       <section className="overview-hero map-reveal">
-        <ChandigarhMap className="overview-map" />
+        <ChandigarhMap
+          className="overview-map"
+          trafficNodes={trafficMap?.nodes ?? []}
+        />
 
         <div className="map-stats-float">
           <div className="map-stat-chip chip-blue">
             <span><Icon name="network" /></span>
-            <strong>{roads.length.toString().padStart(2, "0")}</strong>
-            <small>key corridors</small>
+            <strong>{trafficMap?.total_nodes.toString().padStart(2, "0") ?? "—"}</strong>
+            <small>sample locations</small>
           </div>
 
           <div className="map-stat-chip chip-mint">
             <span><Icon name="clients" /></span>
-            <strong>{roads.length.toString().padStart(2, "0")}</strong>
-            <small>road clients</small>
+            <strong>{dashboard?.participating_clients.toString().padStart(2, "0") ?? "—"}</strong>
+            <small>configured clients</small>
           </div>
 
           <div className="map-stat-chip chip-yellow">
             <span><Icon name="clock" /></span>
-            <strong>15–60</strong>
-            <small>min outlook</small>
+            <strong>5–15</strong>
+            <small>min prediction</small>
           </div>
         </div>
 
@@ -78,10 +126,14 @@ export default function Overview() {
           <span className="map-caption-pulse" />
           <div>
             <strong>Chandigarh road network</strong>
-            <small>Illustrative corridor markers · not live sensor data</small>
+            <small>{trafficMap?.data_source ?? "Loading sample traffic locations"}</small>
           </div>
         </div>
       </section>
+
+      {!isLoading && !errorMessage && trafficMap?.nodes.length === 0 && (
+        <EmptyState message="No traffic locations are available from the backend." />
+      )}
 
       <section className="summary-grid">
         <article className="summary-card">
@@ -89,8 +141,8 @@ export default function Overview() {
             <span>Training rounds</span>
             <span className="summary-icon"><Icon name="training" /></span>
           </div>
-          <strong>0</strong>
-          <small>No training runs recorded</small>
+          <strong>{dashboard?.training_round ?? "—"}</strong>
+          <small>{dashboard?.data_source ?? "Awaiting backend data"}</small>
         </article>
 
         <article className="summary-card">
@@ -98,8 +150,8 @@ export default function Overview() {
             <span>Configured clients</span>
             <span className="summary-icon"><Icon name="clients" /></span>
           </div>
-          <strong>{roads.length.toString().padStart(2, "0")}</strong>
-          <small>Configured road locations</small>
+          <strong>{dashboard?.participating_clients.toString().padStart(2, "0") ?? "—"}</strong>
+          <small>Backend-reported clients</small>
         </article>
 
         <article className="summary-card">
@@ -107,8 +159,8 @@ export default function Overview() {
             <span>Traffic outlook</span>
             <span className="summary-icon"><Icon name="predictions" /></span>
           </div>
-          <strong>Illustrative</strong>
-          <small>Not a live prediction</small>
+          <strong>{dashboard?.predicted_traffic_status ?? "—"}</strong>
+          <small>{dashboard?.data_source ?? "Awaiting backend data"}</small>
         </article>
 
         <article className="summary-card">
@@ -116,8 +168,12 @@ export default function Overview() {
             <span>Model status</span>
             <span className="summary-icon"><Icon name="clock" /></span>
           </div>
-          <strong>Offline</strong>
-          <small>Model integration pending</small>
+          <strong>{dashboard?.global_model_status ?? "—"}</strong>
+          <small>
+            {dashboard && dashboard.evaluation_metrics.mae !== null
+              ? `MAE ${dashboard.evaluation_metrics.mae}`
+              : "No evaluated model metrics"}
+          </small>
         </article>
       </section>
 

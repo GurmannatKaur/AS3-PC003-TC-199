@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   CircleMarker,
   MapContainer,
@@ -14,6 +14,7 @@ import { roads } from "../data/trafficSamples";
 import { formatSpeed, usePreferences } from "../data/preferences";
 import Icon from "./common/Icon";
 import type { Coordinates, RoutePlan } from "../api/routingApi";
+import type { TrafficMapNode } from "../types/dashboard";
 import type { MapPickMode } from "./EmergencyRouteRouting";
 
 type ChandigarhMapProps = {
@@ -21,9 +22,20 @@ type ChandigarhMapProps = {
   onSelectRoad?: (roadId: string) => void;
   className?: string;
   routePlan?: RoutePlan | null;
+  trafficNodes?: TrafficMapNode[];
   mapPickMode?: MapPickMode;
   onMapLocationPicked?: (coordinates: Coordinates) => void;
 };
+
+interface MapLocation {
+  id: string;
+  name: string;
+  position: [number, number];
+  congestion: "High" | "Moderate" | "Low";
+  averageSpeed: number;
+  vehicleCount: number;
+  detail: string;
+}
 
 const center: [number, number] = [30.7333, 76.7794];
 const congestionColors = {
@@ -32,12 +44,38 @@ const congestionColors = {
   Low: "#4bc797",
 };
 
+function getMapLocations(trafficNodes?: TrafficMapNode[]): MapLocation[] {
+  if (trafficNodes) {
+    return trafficNodes.map((node) => ({
+      id: node.id,
+      name: node.name,
+      position: [node.latitude, node.longitude] as [number, number],
+      congestion: node.traffic_level,
+      averageSpeed: node.average_speed,
+      vehicleCount: node.vehicle_count,
+      detail: `Sample client status: ${node.client_status} · sample traffic data`,
+    }));
+  }
+
+  return roads.map((road) => ({
+    id: road.id,
+    name: road.name,
+    position: road.position,
+    congestion: road.congestion,
+    averageSpeed: road.averageSpeed,
+    vehicleCount: road.flow,
+    detail: "Illustrative values · approximate marker location",
+  }));
+}
+
 function MapBehavior({
   selectedRoadId,
   routePlan,
+  locations,
 }: {
   selectedRoadId?: string;
   routePlan?: RoutePlan | null;
+  locations: MapLocation[];
 }) {
   const map = useMap();
   const activeRoute = routePlan?.options.find((option) => option.id === routePlan.selectedOptionId);
@@ -55,9 +93,9 @@ function MapBehavior({
     if (activeRoute && activeRoute.coordinates.length > 1) {
       map.fitBounds(activeRoute.coordinates, { padding: [72, 72], maxZoom: 15, animate: true });
     } else if (selectedRoadId) {
-      const selectedRoad = roads.find((road) => road.id === selectedRoadId);
-      if (selectedRoad) {
-        map.panTo(selectedRoad.position, { animate: true, duration: 0.45 });
+      const selectedLocation = locations.find((location) => location.id === selectedRoadId);
+      if (selectedLocation) {
+        map.panTo(selectedLocation.position, { animate: true, duration: 0.45 });
       }
     }
 
@@ -67,7 +105,7 @@ function MapBehavior({
       container.removeEventListener("mouseleave", disableWheelZoom);
       disableWheelZoom();
     };
-  }, [map, selectedRoadId, routePlan, activeRoute]);
+  }, [map, selectedRoadId, routePlan, activeRoute, locations]);
 
   return null;
 }
@@ -148,30 +186,35 @@ function EmergencyRouteLayer({ routePlan }: { routePlan: RoutePlan | null | unde
 function FloatingMapControls({
   selectedRoadId,
   onSelectRoad,
+  locations,
 }: {
   selectedRoadId?: string;
   onSelectRoad?: (roadId: string) => void;
+  locations: MapLocation[];
 }) {
   const map = useMap();
-  const selectedRoad = roads.find((road) => road.id === selectedRoadId) ?? roads[0];
+  const selectedLocation =
+    locations.find((location) => location.id === selectedRoadId) ?? locations[0];
   const { speedUnit } = usePreferences();
 
   return (
     <>
       <div className="map-floating-controls">
-        <label className="map-road-select">
-          <Icon name="location" className="map-control-pin" />
-          <span className="sr-only">Select a road</span>
-          <select
-            value={selectedRoad.id}
-            onChange={(event) => onSelectRoad?.(event.target.value)}
-            aria-label="Select a road"
-          >
-            {roads.map((road) => (
-              <option value={road.id} key={road.id}>{road.name}</option>
-            ))}
-          </select>
-        </label>
+        {locations.length > 0 && selectedLocation && (
+          <label className="map-road-select">
+            <Icon name="location" className="map-control-pin" />
+            <span className="sr-only">Select a traffic location</span>
+            <select
+              value={selectedLocation.id}
+              onChange={(event) => onSelectRoad?.(event.target.value)}
+              aria-label="Select a traffic location"
+            >
+              {locations.map((location) => (
+                <option value={location.id} key={location.id}>{location.name}</option>
+              ))}
+            </select>
+          </label>
+        )}
         <div className="map-zoom-controls" aria-label="Map controls">
           <button type="button" onClick={() => map.zoomIn()} aria-label="Zoom in"><Icon name="plus" /></button>
           <button type="button" onClick={() => map.zoomOut()} aria-label="Zoom out"><Icon name="minus" /></button>
@@ -187,13 +230,18 @@ function FloatingMapControls({
         </div>
       </div>
 
-      <div className="map-selected-chip">
-        <span className={`traffic-dot ${selectedRoad.congestion.toLowerCase()}`} />
-        <span className="map-chip-copy">
-          <strong>{selectedRoad.name}</strong>
-          <small>{selectedRoad.congestion} · {formatSpeed(selectedRoad.averageSpeed, speedUnit)} · {selectedRoad.flow.toLocaleString()} veh/h</small>
-        </span>
-      </div>
+      {selectedLocation && (
+        <div className="map-selected-chip">
+          <span className={`traffic-dot ${selectedLocation.congestion.toLowerCase()}`} />
+          <span className="map-chip-copy">
+            <strong>{selectedLocation.name}</strong>
+            <small>
+              {selectedLocation.congestion} · {formatSpeed(selectedLocation.averageSpeed, speedUnit)} ·{" "}
+              {selectedLocation.vehicleCount.toLocaleString()} vehicles
+            </small>
+          </span>
+        </div>
+      )}
     </>
   );
 }
@@ -203,10 +251,12 @@ export default function ChandigarhMap({
   onSelectRoad,
   className = "",
   routePlan,
+  trafficNodes,
   mapPickMode = null,
   onMapLocationPicked,
 }: ChandigarhMapProps) {
   const { compactMapLabels } = usePreferences();
+  const locations = useMemo(() => getMapLocations(trafficNodes), [trafficNodes]);
 
   return (
     <div className={`chandigarh-map ${className} ${compactMapLabels ? "compact-labels" : ""}`}>
@@ -221,35 +271,40 @@ export default function ChandigarhMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <MapBehavior selectedRoadId={selectedRoadId} routePlan={routePlan} />
+        <MapBehavior
+          selectedRoadId={selectedRoadId}
+          routePlan={routePlan}
+          locations={locations}
+        />
         <MapLocationPicker mode={mapPickMode} onPick={onMapLocationPicked} />
         <FloatingMapControls
           selectedRoadId={selectedRoadId}
           onSelectRoad={onSelectRoad}
+          locations={locations}
         />
-        {roads.map((road) => (
+        {locations.map((location) => (
           <CircleMarker
-            key={road.id}
-            center={road.position}
-            radius={selectedRoadId === road.id ? 13 : 10}
+            key={location.id}
+            center={location.position}
+            radius={selectedRoadId === location.id ? 13 : 10}
             pathOptions={{
               color: "#ffffff",
-              weight: selectedRoadId === road.id ? 4 : 3,
-              fillColor: congestionColors[road.congestion],
+              weight: selectedRoadId === location.id ? 4 : 3,
+              fillColor: congestionColors[location.congestion],
               fillOpacity: 0.98,
             }}
             eventHandlers={{
-              click: () => onSelectRoad?.(road.id),
+              click: () => onSelectRoad?.(location.id),
             }}
           >
             <Popup>
               <div className="junction-popup">
-                <strong>{road.name}</strong>
-                <span>{road.junction} · Chandigarh</span>
-                <span className={`traffic-level ${road.congestion.toLowerCase()}`}>
-                  {road.congestion} traffic
+                <strong>{location.name}</strong>
+                <span>Chandigarh</span>
+                <span className={`traffic-level ${location.congestion.toLowerCase()}`}>
+                  {location.congestion} traffic
                 </span>
-                <small>Illustrative values · approximate marker location</small>
+                <small>{location.detail}</small>
               </div>
             </Popup>
           </CircleMarker>
