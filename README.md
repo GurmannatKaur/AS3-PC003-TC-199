@@ -4,9 +4,11 @@ This repository will contain the code and resources for the AIORI-3 hackathon th
 
 [Watch our Team Introduction Video on YouTube](https://youtu.be/Upl7b4JWGsg)
 
-## MOSAIC - Federated Traffic-Flow Prediction
+## 
+
+\## MOSAIC - Federated Traffic-Flow Prediction
 
 
 
-\[Watch the MOSAIC Project Demo](MOSAIC%20-%20Google%20Chrome%202026-10-31%2010-58-52.mp4)
+\[Watch the MOSAIC Project Demo](<MOSAIC - Google Chrome 2026-10-31 10-58-52.mp4>)
 
